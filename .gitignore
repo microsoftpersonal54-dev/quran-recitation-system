@@ -39,3 +39,22 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Environment / secrets
+.env
+.env.local
+.env*.local
+
+# Private data
+/data/database/*
+!/data/database/.gitkeep
+/data/recordings/*
+!/data/recordings/.gitkeep
+/data/backups/*
+!/data/backups/.gitkeep
+/data/exports/*
+!/data/exports/.gitkeep
+/data/logs/*
+!/data/logs/.gitkeep
+/certs/
+/mkcert.exe
+/coverage/
