@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+// ============ USERS & AUTH ============
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   // STUDENT | FATHER | QARI
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sessions      Session[]
+  recordings    Recording[]    @relation("student_recordings")
+  mistakes      Mistake[]      @relation("reviewer_mistakes")
+  notifications Notification[]
+  auditLogs     AuditLog[]
+    pushSubscriptions PushSubscription[]
+
+  @@index([role])
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ============ RECORDINGS ============
+
+model Recording {
+  id            String    @id @default(cuid())
+  studentId     String
+  surahNumber   Int
+  surahName     String
+  ayahFrom      Int
+  ayahTo        Int
+  durationMs    Int
+  notes         String?
+  filePath      String
+  fileName      String
+  mimeType      String
+  fileSizeBytes Int
+  checksum      String?
+  uploadStatus  String    @default("PENDING")    // PENDING | UPLOADED | FAILED
+  reviewStatus  String    @default("UNREVIEWED") // UNREVIEWED | IN_REVIEW | REVIEWED
+  recordedAt    DateTime  @default(now())
+  uploadedAt    DateTime?
+  timezone      String    @default("UTC")
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Reserved for future audio analysis — NOT used in MVP.
+  analysisStatus   String?
+  transcription    String?
+  detectedAyahs    String?
+  confidence       Float?
+  detectedIssues   String?
+  analysisProvider String?
+  analysisVersion  String?
+
+  student       User           @relation("student_recordings", fields: [studentId], references: [id])
+  mistakes      Mistake[]
+  notifications Notification[]
+
+  @@index([studentId])
+  @@index([recordedAt])
+  @@index([surahNumber])
+  @@index([reviewStatus])
+}
+
+model Mistake {
+  id          String   @id @default(cuid())
+  recordingId String
+  reviewerId  String
+  timestampMs Int
+  ayahNumber  Int?
+  category    String   // TAJWEED | PRONUNCIATION | MADD | MAKHARIJ | GHUNNAH | WAQF | GENERAL | OTHER
+  severity    String   // MINOR | MEDIUM | MAJOR
+  description String
+  correction  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recording Recording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+  reviewer  User      @relation("reviewer_mistakes", fields: [reviewerId], references: [id])
+
+  @@index([recordingId])
+  @@index([category])
+}
+
+// ============ NOTIFICATIONS ============
+
+model Notification {
+  id          String    @id @default(cuid())
+  recipientId String
+  recordingId String?
+  type        String    // NEW_RECORDING | RECORDING_REVIEWED | ...
+  title       String
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  recipient User       @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  recording Recording? @relation(fields: [recordingId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId])
+  @@index([readAt])
+}
+
+// ============ AUDIT & SETTINGS ============
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  target    String?
+  metadata  String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  keys      String   // JSON string containing p256dh and auth
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

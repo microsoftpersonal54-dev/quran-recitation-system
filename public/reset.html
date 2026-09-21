@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Resetting app…</title>
+    <style>
+      body { font: 16px/1.5 system-ui, sans-serif; margin: 24px; }
+      pre { background: #f5f5f5; padding: 12px; border-radius: 6px; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>Resetting…</h1>
+    <pre id="out">Working…</pre>
+    <script>
+      (async () => {
+        const out = document.getElementById("out");
+        const log = (s) => { out.textContent += s + "\n"; };
+        try {
+          out.textContent = "";
+          if ("serviceWorker" in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            log("Found " + regs.length + " service worker(s).");
+            for (const r of regs) {
+              const ok = await r.unregister();
+              log("Unregistered " + r.scope + ": " + ok);
+            }
+          } else {
+            log("No service worker support in this browser.");
+          }
+          if ("caches" in window) {
+            const keys = await caches.keys();
+            log("Found " + keys.length + " cache bucket(s).");
+            for (const k of keys) {
+              await caches.delete(k);
+              log("Cleared cache: " + k);
+            }
+          }
+          log("");
+          log("✅ Done. Now:");
+          log("1. Fully close Chrome (swipe it away).");
+          log("2. Reopen and go to https://192.168.18.106:3000/login");
+        } catch (e) {
+          log("Error: " + (e && e.message ? e.message : String(e)));
+        }
+      })();
+    </script>
+  </body>
+</html>
