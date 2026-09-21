@@ -5,8 +5,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
+
 // ============ USERS & AUTH ============
 
 model User {
@@ -19,12 +19,12 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  sessions      Session[]
-  recordings    Recording[]    @relation("student_recordings")
-  mistakes      Mistake[]      @relation("reviewer_mistakes")
-  notifications Notification[]
-  auditLogs     AuditLog[]
-    pushSubscriptions PushSubscription[]
+  sessions          Session[]
+  recordings        Recording[]         @relation("student_recordings")
+  mistakes          Mistake[]           @relation("reviewer_mistakes")
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  pushSubscriptions PushSubscription[]
 
   @@index([role])
 }
@@ -61,8 +61,8 @@ model Recording {
   mimeType      String
   fileSizeBytes Int
   checksum      String?
-  uploadStatus  String    @default("PENDING")    // PENDING | UPLOADED | FAILED
-  reviewStatus  String    @default("UNREVIEWED") // UNREVIEWED | IN_REVIEW | REVIEWED
+  uploadStatus  String    @default("PENDING")
+  reviewStatus  String    @default("UNREVIEWED")
   recordedAt    DateTime  @default(now())
   uploadedAt    DateTime?
   timezone      String    @default("UTC")
@@ -95,8 +95,8 @@ model Mistake {
   reviewerId  String
   timestampMs Int
   ayahNumber  Int?
-  category    String   // TAJWEED | PRONUNCIATION | MADD | MAKHARIJ | GHUNNAH | WAQF | GENERAL | OTHER
-  severity    String   // MINOR | MEDIUM | MAJOR
+  category    String
+  severity    String
   description String
   correction  String?
   createdAt   DateTime @default(now())
@@ -115,7 +115,7 @@ model Notification {
   id          String    @id @default(cuid())
   recipientId String
   recordingId String?
-  type        String    // NEW_RECORDING | RECORDING_REVIEWED | ...
+  type        String
   title       String
   body        String
   readAt      DateTime?
@@ -151,11 +151,12 @@ model AppSetting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
 model PushSubscription {
   id        String   @id @default(cuid())
   userId    String
   endpoint  String   @unique
-  keys      String   // JSON string containing p256dh and auth
+  keys      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
