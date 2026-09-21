@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
-import { createBackup, listBackups } from "@/server/backups/service";
+import { createBackupPayload } from "@/server/backups/service";
 import { audit } from "@/server/audit";
 
 export const runtime = "nodejs";
@@ -14,36 +14,27 @@ export async function GET() {
   if (user.role !== "FATHER") {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
-  const items = await listBackups();
-  return NextResponse.json({ items });
+
+  const payload = await createBackupPayload();
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+
+  await audit({
+    userId: user.id,
+    action: "backup.downloaded",
+    metadata: { exportedAt: payload.exportedAt, counts: payload.counts },
+  });
+
+  return new NextResponse(JSON.stringify(payload, null, 2), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="quran-backup-${stamp}.json"`,
+      "Cache-Control": "private, no-store",
+    },
+  });
 }
 
 export async function POST() {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-  if (user.role !== "FATHER") {
-    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-  }
-
-  try {
-    const result = await createBackup();
-    await audit({
-      userId: user.id,
-      action: "backup.created",
-      metadata: {
-        sqliteFile: result.sqliteFile,
-        jsonFile: result.jsonFile,
-        sqliteBytes: result.sqliteBytes,
-      },
-    });
-    return NextResponse.json({ backup: result }, { status: 201 });
-  } catch (err) {
-    console.error("[backup] failed", err);
-    return NextResponse.json(
-      { error: "Could not create backup." },
-      { status: 500 }
-    );
-  }
+  // Alias for GET — clicking "Create backup now" triggers a download.
+  return GET();
 }
