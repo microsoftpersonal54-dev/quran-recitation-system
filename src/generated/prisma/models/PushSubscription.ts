@@ -404,6 +404,7 @@ export type PushSubscriptionCreateOrConnectWithoutUserInput = {
 
 export type PushSubscriptionCreateManyUserInputEnvelope = {
   data: Prisma.PushSubscriptionCreateManyUserInput | Prisma.PushSubscriptionCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type PushSubscriptionUpsertWithWhereUniqueWithoutUserInput = {
@@ -1194,6 +1195,7 @@ export type PushSubscriptionCreateManyArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many PushSubscriptions.
    */
   data: Prisma.PushSubscriptionCreateManyInput | Prisma.PushSubscriptionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1212,6 +1214,7 @@ export type PushSubscriptionCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    * The data used to create many PushSubscriptions.
    */
   data: Prisma.PushSubscriptionCreateManyInput | Prisma.PushSubscriptionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

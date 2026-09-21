@@ -1080,6 +1080,7 @@ export type RecordingCreateOrConnectWithoutStudentInput = {
 
 export type RecordingCreateManyStudentInputEnvelope = {
   data: Prisma.RecordingCreateManyStudentInput | Prisma.RecordingCreateManyStudentInput[]
+  skipDuplicates?: boolean
 }
 
 export type RecordingUpsertWithWhereUniqueWithoutStudentInput = {
@@ -2452,6 +2453,7 @@ export type RecordingCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many Recordings.
    */
   data: Prisma.RecordingCreateManyInput | Prisma.RecordingCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -2470,6 +2472,7 @@ export type RecordingCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many Recordings.
    */
   data: Prisma.RecordingCreateManyInput | Prisma.RecordingCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

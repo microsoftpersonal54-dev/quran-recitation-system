@@ -626,6 +626,7 @@ export type MistakeCreateOrConnectWithoutReviewerInput = {
 
 export type MistakeCreateManyReviewerInputEnvelope = {
   data: Prisma.MistakeCreateManyReviewerInput | Prisma.MistakeCreateManyReviewerInput[]
+  skipDuplicates?: boolean
 }
 
 export type MistakeUpsertWithWhereUniqueWithoutReviewerInput = {
@@ -694,6 +695,7 @@ export type MistakeCreateOrConnectWithoutRecordingInput = {
 
 export type MistakeCreateManyRecordingInputEnvelope = {
   data: Prisma.MistakeCreateManyRecordingInput | Prisma.MistakeCreateManyRecordingInput[]
+  skipDuplicates?: boolean
 }
 
 export type MistakeUpsertWithWhereUniqueWithoutRecordingInput = {
@@ -1582,6 +1584,7 @@ export type MistakeCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * The data used to create many Mistakes.
    */
   data: Prisma.MistakeCreateManyInput | Prisma.MistakeCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1600,6 +1603,7 @@ export type MistakeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many Mistakes.
    */
   data: Prisma.MistakeCreateManyInput | Prisma.MistakeCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

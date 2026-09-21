@@ -58,3 +58,6 @@ next-env.d.ts
 /certs/
 /mkcert.exe
 /coverage/
+# Prisma generated
+src/generated/
+
