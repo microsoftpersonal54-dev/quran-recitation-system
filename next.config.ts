@@ -2,18 +2,14 @@ import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === "production";
 
-// Content Security Policy: strict enough to be meaningful, permissive enough
-// for Next.js dev + Tailwind. Audio plays from the same origin via blob:.
 const csp = [
   "default-src 'self'",
-  // Next.js injects inline scripts for hydration; 'unsafe-inline' is required.
-  // In dev, also allow 'unsafe-eval' for the Turbopack runtime.
   `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data:",
-  "media-src 'self' blob:",
-  "connect-src 'self' https://openrouter.ai",
+  "media-src 'self' blob: https://res.cloudinary.com",
+  "connect-src 'self' https://openrouter.ai https://res.cloudinary.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -30,11 +26,7 @@ const securityHeaders = [
     value: "camera=(), microphone=(self), geolocation=()",
   },
   { key: "X-DNS-Prefetch-Control", value: "off" },
-  {
-    key: "Strict-Transport-Security",
-    value: isProd ? "max-age=31536000; includeSubDomains" : "",
-  },
-].filter((h) => h.value !== "");
+];
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -42,13 +34,6 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
-      },
-      {
-        // Never cache protected audio or API responses.
-        source: "/api/:path*",
-        headers: [
-          { key: "Cache-Control", value: "private, no-store, max-age=0" },
-        ],
       },
     ];
   },
