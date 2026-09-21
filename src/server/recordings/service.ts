@@ -1,18 +1,22 @@
 import "server-only";
-import fs from "node:fs/promises";
-import path from "node:path";
 import crypto from "node:crypto";
 import { db } from "@/lib/db";
 import { getSurah } from "@/lib/quran/surahs";
+import { v2 as cloudinary } from "cloudinary";
 import {
-  ensureDirFor,
   extensionForMime,
   isAllowedMime,
   maxUploadBytes,
-  relativePathFor,
-  resolveStoredPath,
 } from "@/lib/storage/recordings-path";
 import type { CreateRecordingInput } from "@/lib/validation/recordings";
+
+// ---- Cloudinary configuration ----
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
 export interface CreateRecordingOptions extends CreateRecordingInput {
   studentId: string;
@@ -30,6 +34,35 @@ export interface CreatedRecording {
   recordedAt: Date;
   uploadStatus: string;
   reviewStatus: string;
+}
+
+interface CloudinaryUploadResult {
+  secure_url: string;
+  public_id: string;
+  bytes: number;
+  resource_type: string;
+}
+
+function uploadToCloudinary(
+  buffer: Buffer,
+  mimeType: string
+): Promise<CloudinaryUploadResult> {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        resource_type: "video",
+        folder: "quran-recitations",
+        context: { mimeType },
+      },
+      (error, result) => {
+        if (error || !result) {
+          return reject(error ?? new Error("CLOUDINARY_UPLOAD_FAILED"));
+        }
+        resolve(result as unknown as CloudinaryUploadResult);
+      }
+    );
+    uploadStream.end(buffer);
+  });
 }
 
 export async function createRecording(
@@ -53,23 +86,23 @@ export async function createRecording(
   if (opts.ayahTo > surah.ayahCount) throw new Error("INVALID_AYAH_RANGE");
 
   const now = new Date();
-  const relative = relativePathFor(now, ext);
-  const fullPath = await ensureDirFor(relative);
-
-  // Write file first. If DB insert fails, remove the file so we don't
-  // leave orphan bytes on disk.
-  await fs.writeFile(fullPath, opts.fileBuffer, { mode: 0o600 });
 
   const checksum = crypto
     .createHash("sha256")
     .update(opts.fileBuffer)
     .digest("hex");
 
+  // 1. Upload to Cloudinary first.
+  let upload: CloudinaryUploadResult;
   try {
-    // NOTE: We deliberately do NOT wrap this in db.$transaction().
-    // With the Prisma 7 better-sqlite3 adapter, interactive transactions
-    // can fail with a misleading P1008 SocketTimeout when SQLite is
-    // briefly busy. A single create() is already atomic on its own.
+    upload = await uploadToCloudinary(opts.fileBuffer, opts.mimeType);
+  } catch (err) {
+    console.error("[recordings] Cloudinary upload failed", err);
+    throw new Error("UPLOAD_FAILED");
+  }
+
+  // 2. Insert the DB row.
+  try {
     const created = await db.recording.create({
       data: {
         studentId: opts.studentId,
@@ -79,8 +112,8 @@ export async function createRecording(
         ayahTo: opts.ayahTo,
         durationMs: opts.durationMs,
         notes: opts.notes || null,
-        filePath: relative,
-        fileName: path.basename(relative),
+        filePath: upload.secure_url,
+        fileName: upload.public_id,
         mimeType: opts.mimeType,
         fileSizeBytes: opts.fileBuffer.byteLength,
         checksum,
@@ -104,8 +137,9 @@ export async function createRecording(
       reviewStatus: created.reviewStatus,
     };
   } catch (err) {
-    // Roll back the file write so we don't leave orphan bytes
-    await fs.unlink(fullPath).catch(() => {});
+    await cloudinary.uploader
+      .destroy(upload.public_id, { resource_type: "video" })
+      .catch(() => {});
     throw err;
   }
 }
@@ -140,11 +174,5 @@ export async function getRecordingById(id: string) {
 export async function openRecordingStream(id: string) {
   const rec = await getRecordingById(id);
   if (!rec) return null;
-  const fullPath = resolveStoredPath(rec.filePath);
-  try {
-    await fs.access(fullPath);
-  } catch {
-    return null;
-  }
-  return { recording: rec, fullPath };
+  return { recording: rec, remoteUrl: rec.filePath };
 }
