@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mic, Pause, Play, Square, RotateCcw, X } from "lucide-react";
+import { Mic, Pause, Play, Square, RotateCcw, X, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMediaRecorder } from "@/hooks/useMediaRecorder";
 import { formatMs } from "@/lib/format";
+import { getParasForRange, PARAS } from "@/lib/quran/paras";
 import SurahSelector from "./SurahSelector";
-import { enqueue } from "@/lib/offline/queue";
+import QariPicker from "./QariPicker";
 
 interface Props {
   studentName: string;
@@ -20,11 +21,19 @@ export default function Recorder({ studentName }: Props) {
   const [ayahFrom, setAyahFrom] = useState(1);
   const [ayahTo, setAyahTo] = useState(7);
   const [notes, setNotes] = useState("");
+  const [qariId, setQariId] = useState<string | null>(null);
 
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
-    const [queued, setQueued] = useState(false);
+  const [queued, setQueued] = useState(false);
+
+  const paraRange = getParasForRange(surahNumber, ayahFrom, surahNumber, ayahTo);
+  const paraLabel = paraRange
+    ? paraRange.paraFrom === paraRange.paraTo
+      ? `Para ${paraRange.paraFrom} — ${PARAS[paraRange.paraFrom - 1]?.name ?? ""}`
+      : `Paras ${paraRange.paraFrom}–${paraRange.paraTo}`
+    : null;
 
   async function handleStart() {
     setUploadError(null);
@@ -35,6 +44,7 @@ export default function Recorder({ studentName }: Props) {
     rec.reset();
     setUploadError(null);
     setUploadProgress(0);
+    setQueued(false);
   }
 
   function handleCancel() {
@@ -56,6 +66,10 @@ export default function Recorder({ studentName }: Props) {
       surahNumber,
       ayahFrom,
       ayahTo,
+      paraNumber: paraRange?.paraFrom ?? null,
+      paraFrom: paraRange?.paraFrom ?? null,
+      paraTo: paraRange?.paraTo ?? null,
+      qariId,
       notes,
       timezone,
     };
@@ -67,6 +81,11 @@ export default function Recorder({ studentName }: Props) {
       form.append("surahNumber", String(surahNumber));
       form.append("ayahFrom", String(ayahFrom));
       form.append("ayahTo", String(ayahTo));
+      if (paraRange) {
+        form.append("paraFrom", String(paraRange.paraFrom));
+        form.append("paraTo", String(paraRange.paraTo));
+      }
+      if (qariId) form.append("qariId", qariId);
       form.append("durationMs", String(rec.take.durationMs));
       form.append("notes", notes);
       form.append("timezone", timezone);
@@ -82,15 +101,12 @@ export default function Recorder({ studentName }: Props) {
         router.refresh();
         return;
       }
-
       if (status >= 400 && status < 500) {
         throw new Error(body?.error ?? `Upload failed (${status}).`);
       }
-
       throw new Error("SERVER_ERROR");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-
       const shouldQueue =
         msg === "SERVER_ERROR" ||
         msg === "Network error during upload." ||
@@ -98,8 +114,9 @@ export default function Recorder({ studentName }: Props) {
         msg === "Failed to fetch" ||
         !navigator.onLine;
 
-                 if (shouldQueue) {
+      if (shouldQueue) {
         try {
+          const { enqueue } = await import("@/lib/offline/queue");
           await enqueue(payload);
           setUploading(false);
           setQueued(true);
@@ -154,7 +171,7 @@ export default function Recorder({ studentName }: Props) {
 
   if (rec.status === "stopped" && rec.take) {
     return (
-           <PreviewView
+      <PreviewView
         studentName={studentName}
         durationMs={rec.take.durationMs}
         blob={rec.take.blob}
@@ -162,6 +179,7 @@ export default function Recorder({ studentName }: Props) {
         surahNumber={surahNumber}
         ayahFrom={ayahFrom}
         ayahTo={ayahTo}
+        paraLabel={paraLabel}
         notes={notes}
         uploading={uploading}
         uploadProgress={uploadProgress}
@@ -180,7 +198,10 @@ export default function Recorder({ studentName }: Props) {
       surahNumber={surahNumber}
       ayahFrom={ayahFrom}
       ayahTo={ayahTo}
+      paraLabel={paraLabel}
       notes={notes}
+      qariId={qariId}
+      onQariChange={setQariId}
       onSurahChange={(v) => {
         setSurahNumber(v.surahNumber);
         setAyahFrom(v.ayahFrom);
@@ -236,12 +257,17 @@ function uploadWithProgress(
   });
 }
 
+// ---------- Setup ----------
+
 function SetupView({
   studentName,
   surahNumber,
   ayahFrom,
   ayahTo,
+  paraLabel,
   notes,
+  qariId,
+  onQariChange,
   onSurahChange,
   onNotesChange,
   onStart,
@@ -250,7 +276,10 @@ function SetupView({
   surahNumber: number;
   ayahFrom: number;
   ayahTo: number;
+  paraLabel: string | null;
   notes: string;
+  qariId: string | null;
+  onQariChange: (id: string | null) => void;
   onSurahChange: (v: {
     surahNumber: number;
     ayahFrom: number;
@@ -277,6 +306,20 @@ function SetupView({
           ayahTo={ayahTo}
           onChange={onSurahChange}
         />
+
+        {paraLabel && (
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2">
+            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <BookOpen className="h-3.5 w-3.5" aria-hidden />
+              Para (auto-detected)
+            </div>
+            <p className="mt-0.5 text-sm font-medium text-neutral-900">
+              {paraLabel}
+            </p>
+          </div>
+        )}
+
+        <QariPicker value={qariId} onChange={onQariChange} />
 
         <div>
           <label
@@ -310,6 +353,8 @@ function SetupView({
     </div>
   );
 }
+
+// ---------- Live ----------
 
 function LiveView({
   studentName,
@@ -446,16 +491,15 @@ function Waveform({ active, level }: { active: boolean; level: number }) {
             className={`w-[3px] rounded-full ${
               active ? "bg-neutral-800" : "bg-neutral-300"
             }`}
-            style={{
-              height: `${h}px`,
-              transition: "height 80ms linear",
-            }}
+            style={{ height: `${h}px`, transition: "height 80ms linear" }}
           />
         );
       })}
     </div>
   );
 }
+
+// ---------- Preview ----------
 
 function PreviewView({
   studentName,
@@ -465,6 +509,7 @@ function PreviewView({
   surahNumber,
   ayahFrom,
   ayahTo,
+  paraLabel,
   notes,
   uploading,
   uploadProgress,
@@ -481,6 +526,7 @@ function PreviewView({
   surahNumber: number;
   ayahFrom: number;
   ayahTo: number;
+  paraLabel: string | null;
   notes: string;
   uploading: boolean;
   uploadProgress: number;
@@ -523,6 +569,14 @@ function PreviewView({
           <dd className="text-right font-medium text-neutral-900">
             {ayahFrom}–{ayahTo}
           </dd>
+          {paraLabel && (
+            <>
+              <dt className="text-neutral-500">Para</dt>
+              <dd className="text-right font-medium text-neutral-900">
+                {paraLabel.replace("Para ", "").replace(/ —.*/, "")}
+              </dd>
+            </>
+          )}
           <dt className="text-neutral-500">Duration</dt>
           <dd className="text-right font-mono font-medium text-neutral-900">
             {formatMs(durationMs)}
@@ -547,12 +601,7 @@ function PreviewView({
 
       {audioUrl && (
         <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
-          <audio
-            src={audioUrl}
-            controls
-            preload="metadata"
-            className="w-full"
-          />
+          <audio src={audioUrl} controls preload="metadata" className="w-full" />
         </div>
       )}
 
@@ -577,14 +626,13 @@ function PreviewView({
         </div>
       )}
 
-            {queued && (
+      {queued && (
         <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-3">
           <p className="text-sm font-medium text-emerald-900">
             Saved on this device.
           </p>
           <p className="mt-1 text-xs text-emerald-800">
-            The recording will upload automatically the moment your internet
-            comes back. You can safely close this screen.
+            The recording will upload automatically when the internet returns.
           </p>
         </div>
       )}

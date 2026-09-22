@@ -3,11 +3,6 @@ import { db } from "@/lib/db";
 import { formatMs } from "@/lib/format";
 import { getSurah, SURAHS } from "@/lib/quran/surahs";
 
-/**
- * Safe, controlled tool definitions. The AI can ONLY call these functions.
- * It cannot run arbitrary SQL, and every parameter is validated here.
- */
-
 export interface ToolDefinition {
   name: string;
   description: string;
@@ -18,25 +13,13 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "get_recitations",
     description:
-      "List recitations in a date range. Use this for questions like 'what did he recite yesterday', 'this week', 'last month'.",
+      "List recitations in a date range. Use for 'what did he recite yesterday', 'this week', 'last month'.",
     parameters: {
       type: "object",
       properties: {
-        fromDate: {
-          type: "string",
-          description:
-            "Start date, inclusive, ISO format YYYY-MM-DD (in local time).",
-        },
-        toDate: {
-          type: "string",
-          description:
-            "End date, inclusive, ISO format YYYY-MM-DD (in local time).",
-        },
-        studentName: {
-          type: "string",
-          description:
-            "Optional student name to filter by. Omit to include all students.",
-        },
+        fromDate: { type: "string", description: "YYYY-MM-DD, inclusive." },
+        toDate: { type: "string", description: "YYYY-MM-DD, inclusive." },
+        studentName: { type: "string", description: "Optional student name." },
       },
       required: ["fromDate", "toDate"],
       additionalProperties: false,
@@ -44,31 +27,23 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: "get_recitation_by_id",
-    description:
-      "Fetch a single recitation by its ID, including its mistakes. Use when the father refers to a specific recording that you already know the ID of.",
+    description: "Fetch a single recitation by ID, including mistakes.",
     parameters: {
       type: "object",
-      properties: {
-        id: { type: "string", description: "The recording ID." },
-      },
+      properties: { id: { type: "string" } },
       required: ["id"],
       additionalProperties: false,
     },
   },
   {
     name: "get_mistakes",
-    description:
-      "List mistakes in a date range (based on the parent recording's date). Optional filters by category.",
+    description: "List mistakes in a date range. Optional category filter.",
     parameters: {
       type: "object",
       properties: {
-        fromDate: { type: "string", description: "YYYY-MM-DD, inclusive." },
-        toDate: { type: "string", description: "YYYY-MM-DD, inclusive." },
-        category: {
-          type: "string",
-          description:
-            "Optional: TAJWEED | PRONUNCIATION | MADD | MAKHARIJ | GHUNNAH | WAQF | GENERAL | OTHER",
-        },
+        fromDate: { type: "string" },
+        toDate: { type: "string" },
+        category: { type: "string" },
       },
       required: ["fromDate", "toDate"],
       additionalProperties: false,
@@ -77,7 +52,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "get_progress_summary",
     description:
-      "Overall statistics: total recordings, total time, total mistakes, streaks, surahs practiced, ayahs covered. Use for questions like 'how much total time' or 'how many mistakes overall'.",
+      "Overall statistics: total recordings, time, mistakes, streaks, surahs, ayahs.",
     parameters: {
       type: "object",
       properties: {},
@@ -86,8 +61,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: "get_unreviewed_recordings",
-    description:
-      "List all recordings that have not yet been marked as REVIEWED. Use for 'which recordings have not been reviewed'.",
+    description: "List recordings not yet marked REVIEWED.",
     parameters: {
       type: "object",
       properties: {},
@@ -96,20 +70,70 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: "get_surah_history",
-    description:
-      "List surahs practiced with recording counts and total time. Optionally filter by date range. Use for 'which surahs has he practiced'.",
+    description: "Surahs practiced with counts and total time.",
     parameters: {
       type: "object",
       properties: {
-        fromDate: {
-          type: "string",
-          description: "Optional YYYY-MM-DD, inclusive.",
-        },
-        toDate: {
-          type: "string",
-          description: "Optional YYYY-MM-DD, inclusive.",
-        },
+        fromDate: { type: "string" },
+        toDate: { type: "string" },
       },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "get_para_progress",
+    description:
+      "Which Paras (Juz) of the Quran have been covered, with session counts and total time per Para. Use for 'how many paras has he done', 'which para is he on', 'what paras has he covered'.",
+    parameters: {
+      type: "object",
+      properties: {
+        fromDate: { type: "string" },
+        toDate: { type: "string" },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "get_attendance",
+    description:
+      "Attendance records (PRESENT / LEAVE / ABSENT) for a student in a date range. Use for 'did he attend', 'how many days was he on leave'.",
+    parameters: {
+      type: "object",
+      properties: {
+        fromDate: { type: "string", description: "YYYY-MM-DD." },
+        toDate: { type: "string", description: "YYYY-MM-DD." },
+        studentName: { type: "string" },
+      },
+      required: ["fromDate", "toDate"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "get_leaves",
+    description:
+      "List all marked leaves in a date range with reasons. Use for 'when was he on leave', 'how many leaves this month'.",
+    parameters: {
+      type: "object",
+      properties: {
+        fromDate: { type: "string" },
+        toDate: { type: "string" },
+        studentName: { type: "string" },
+      },
+      required: ["fromDate", "toDate"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "get_day_detail",
+    description:
+      "What happened on a specific date: attendance status, all recitation sessions, and mistake counts. Use for 'what did he do on September 15', 'show me last Tuesday'.",
+    parameters: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "YYYY-MM-DD." },
+        studentName: { type: "string" },
+      },
+      required: ["date"],
       additionalProperties: false,
     },
   },
@@ -151,14 +175,22 @@ function fmtDate(d: Date): string {
   });
 }
 
+async function resolveStudentId(studentName?: string) {
+  if (!studentName || !studentName.trim()) return undefined;
+  const s = await db.user.findFirst({
+    where: { role: "STUDENT", active: true, name: { contains: studentName.trim() } },
+    select: { id: true, name: true },
+  });
+  return s ?? null;
+}
+
 // -------- executors --------
 
 async function getRecitations(args: Record<string, unknown>) {
   const from = parseDay(args.fromDate);
   const to = parseDay(args.toDate);
-  if (!from || !to) {
-    return { error: "Invalid date range." };
-  }
+  if (!from || !to) return { error: "Invalid date range." };
+
   const studentName =
     typeof args.studentName === "string" && args.studentName.trim().length > 0
       ? args.studentName.trim()
@@ -168,9 +200,7 @@ async function getRecitations(args: Record<string, unknown>) {
     where: {
       deletedAt: null,
       recordedAt: { gte: from, lte: endOfDay(to) },
-      ...(studentName
-        ? { student: { name: { contains: studentName } } }
-        : {}),
+      ...(studentName ? { student: { name: { contains: studentName } } } : {}),
     },
     orderBy: { recordedAt: "asc" },
     select: {
@@ -179,10 +209,13 @@ async function getRecitations(args: Record<string, unknown>) {
       surahNumber: true,
       ayahFrom: true,
       ayahTo: true,
+      paraFrom: true,
+      paraTo: true,
       durationMs: true,
       recordedAt: true,
       reviewStatus: true,
       student: { select: { name: true } },
+      qari: { select: { name: true } },
       _count: { select: { mistakes: true } },
     },
   });
@@ -208,9 +241,12 @@ async function getRecitations(args: Record<string, unknown>) {
       surahNumber: r.surahNumber,
       ayahFrom: r.ayahFrom,
       ayahTo: r.ayahTo,
+      paraFrom: r.paraFrom,
+      paraTo: r.paraTo,
       durationFormatted: fmtDuration(r.durationMs),
       reviewStatus: r.reviewStatus,
       mistakeCount: r._count.mistakes,
+      qari: r.qari?.name ?? null,
     })),
   };
 }
@@ -223,6 +259,7 @@ async function getRecitationById(args: Record<string, unknown>) {
     where: { id: args.id, deletedAt: null },
     include: {
       student: { select: { name: true } },
+      qari: { select: { name: true } },
       mistakes: {
         orderBy: { timestampMs: "asc" },
         include: { reviewer: { select: { name: true } } },
@@ -234,17 +271,19 @@ async function getRecitationById(args: Record<string, unknown>) {
   return {
     id: rec.id,
     student: rec.student.name,
+    qari: rec.qari?.name ?? null,
     date: fmtDate(new Date(rec.recordedAt)),
     time: fmtTime(new Date(rec.recordedAt)),
     surah: rec.surahName,
     surahNumber: rec.surahNumber,
     ayahFrom: rec.ayahFrom,
     ayahTo: rec.ayahTo,
+    paraFrom: rec.paraFrom,
+    paraTo: rec.paraTo,
     durationFormatted: fmtDuration(rec.durationMs),
     reviewStatus: rec.reviewStatus,
     notes: rec.notes,
     mistakes: rec.mistakes.map((m) => ({
-      timestampMs: m.timestampMs,
       timestampFormatted: fmtDuration(m.timestampMs),
       ayahNumber: m.ayahNumber,
       category: m.category,
@@ -326,6 +365,8 @@ async function getProgressSummary() {
       surahNumber: true,
       ayahFrom: true,
       ayahTo: true,
+      paraFrom: true,
+      paraTo: true,
       recordedAt: true,
       _count: { select: { mistakes: true } },
     },
@@ -337,6 +378,7 @@ async function getProgressSummary() {
   const surahs = new Set<number>();
   const ayahKeys = new Set<string>();
   const dayKeys = new Set<string>();
+  const paras = new Set<number>();
 
   for (const r of recordings) {
     totalMs += r.durationMs;
@@ -344,6 +386,9 @@ async function getProgressSummary() {
     surahs.add(r.surahNumber);
     for (let a = r.ayahFrom; a <= r.ayahTo; a++) {
       ayahKeys.add(`${r.surahNumber}:${a}`);
+    }
+    if (r.paraFrom && r.paraTo) {
+      for (let p = r.paraFrom; p <= r.paraTo; p++) paras.add(p);
     }
     const d = new Date(r.recordedAt);
     dayKeys.add(
@@ -403,6 +448,7 @@ async function getProgressSummary() {
     longestStreak,
     surahsPracticed: surahs.size,
     ayahsCovered: ayahKeys.size,
+    parasCovered: paras.size,
   };
 }
 
@@ -459,7 +505,13 @@ async function getSurahHistory(args: Record<string, unknown>) {
 
   const map = new Map<
     number,
-    { surahNumber: number; surahName: string; count: number; totalMs: number; mistakes: number }
+    {
+      surahNumber: number;
+      surahName: string;
+      count: number;
+      totalMs: number;
+      mistakes: number;
+    }
   >();
   for (const r of rows) {
     const existing = map.get(r.surahNumber);
@@ -494,6 +546,236 @@ async function getSurahHistory(args: Record<string, unknown>) {
   };
 }
 
+async function getParaProgress(args: Record<string, unknown>) {
+  const from = typeof args.fromDate === "string" ? parseDay(args.fromDate) : null;
+  const to = typeof args.toDate === "string" ? parseDay(args.toDate) : null;
+
+  const rows = await db.recording.findMany({
+    where: {
+      deletedAt: null,
+      ...(from && to
+        ? { recordedAt: { gte: from, lte: endOfDay(to) } }
+        : {}),
+    },
+    select: {
+      paraFrom: true,
+      paraTo: true,
+      durationMs: true,
+      _count: { select: { mistakes: true } },
+    },
+  });
+
+  const map = new Map<
+    number,
+    { para: number; sessions: number; totalMs: number; mistakes: number }
+  >();
+
+  for (const r of rows) {
+    if (r.paraFrom == null || r.paraTo == null) continue;
+    for (let p = r.paraFrom; p <= r.paraTo; p++) {
+      const existing = map.get(p);
+      if (existing) {
+        existing.sessions += 1;
+        existing.totalMs += r.durationMs;
+        existing.mistakes += r._count.mistakes;
+      } else {
+        map.set(p, {
+          para: p,
+          sessions: 1,
+          totalMs: r.durationMs,
+          mistakes: r._count.mistakes,
+        });
+      }
+    }
+  }
+
+  const paras = Array.from(map.values()).sort((a, b) => a.para - b.para);
+
+  return {
+    fromDate: args.fromDate ?? null,
+    toDate: args.toDate ?? null,
+    totalParasCovered: paras.length,
+    paras: paras.map((p) => ({
+      para: p.para,
+      sessions: p.sessions,
+      totalFormatted: fmtDuration(p.totalMs),
+      mistakes: p.mistakes,
+    })),
+  };
+}
+
+async function getAttendance(args: Record<string, unknown>) {
+  const from = parseDay(args.fromDate);
+  const to = parseDay(args.toDate);
+  if (!from || !to) return { error: "Invalid date range." };
+
+  const studentName =
+    typeof args.studentName === "string" && args.studentName.trim().length > 0
+      ? args.studentName.trim()
+      : undefined;
+
+  let studentId: string | undefined;
+  if (studentName) {
+    const resolved = await resolveStudentId(studentName);
+    if (!resolved) return { error: `No student named "${studentName}".` };
+    if (resolved === null) return { error: `Multiple students match "${studentName}".` };
+    studentId = resolved.id;
+  }
+
+  const rows = await db.attendance.findMany({
+    where: {
+      ...(studentId ? { studentId } : {}),
+      date: { gte: from, lte: endOfDay(to) },
+    },
+    orderBy: { date: "asc" },
+    include: {
+      student: { select: { name: true } },
+      markedBy: { select: { name: true, role: true } },
+    },
+  });
+
+  const byStatus: Record<string, number> = {};
+  for (const r of rows) {
+    byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+  }
+
+  return {
+    fromDate: args.fromDate,
+    toDate: args.toDate,
+    studentName: studentName ?? null,
+    total: rows.length,
+    byStatus,
+    entries: rows.map((r) => ({
+      student: r.student.name,
+      date: fmtDate(new Date(r.date)),
+      dateIso: new Date(r.date).toISOString().slice(0, 10),
+      status: r.status,
+      reason: r.reason,
+      markedBy: r.markedBy ? `${r.markedBy.name} (${r.markedBy.role})` : null,
+    })),
+  };
+}
+
+async function getLeaves(args: Record<string, unknown>) {
+  const from = parseDay(args.fromDate);
+  const to = parseDay(args.toDate);
+  if (!from || !to) return { error: "Invalid date range." };
+
+  const studentName =
+    typeof args.studentName === "string" && args.studentName.trim().length > 0
+      ? args.studentName.trim()
+      : undefined;
+
+  let studentId: string | undefined;
+  if (studentName) {
+    const resolved = await resolveStudentId(studentName);
+    if (!resolved) return { error: `No student named "${studentName}".` };
+    if (resolved === null) return { error: `Multiple students match "${studentName}".` };
+    studentId = resolved.id;
+  }
+
+  const rows = await db.attendance.findMany({
+    where: {
+      status: "LEAVE",
+      ...(studentId ? { studentId } : {}),
+      date: { gte: from, lte: endOfDay(to) },
+    },
+    orderBy: { date: "asc" },
+    include: { student: { select: { name: true } } },
+  });
+
+  return {
+    fromDate: args.fromDate,
+    toDate: args.toDate,
+    studentName: studentName ?? null,
+    totalLeaves: rows.length,
+    leaves: rows.map((r) => ({
+      student: r.student.name,
+      date: fmtDate(new Date(r.date)),
+      dateIso: new Date(r.date).toISOString().slice(0, 10),
+      reason: r.reason,
+    })),
+  };
+}
+
+async function getDayDetail(args: Record<string, unknown>) {
+  const date = parseDay(args.date);
+  if (!date) return { error: "Invalid date." };
+
+  const studentName =
+    typeof args.studentName === "string" && args.studentName.trim().length > 0
+      ? args.studentName.trim()
+      : undefined;
+
+  let studentId: string | undefined;
+  let studentDisplay: string | null = null;
+  if (studentName) {
+    const resolved = await resolveStudentId(studentName);
+    if (!resolved) return { error: `No student named "${studentName}".` };
+    if (resolved === null) return { error: `Multiple students match "${studentName}".` };
+    studentId = resolved.id;
+    studentDisplay = resolved.name;
+  } else {
+    // If no name given, default to the first active student.
+    const first = await db.user.findFirst({
+      where: { role: "STUDENT", active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    });
+    if (!first) return { error: "No students configured." };
+    studentId = first.id;
+    studentDisplay = first.name;
+  }
+
+  const dayStart = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayEnd = new Date(dayStart);
+  dayEnd.setUTCHours(23, 59, 59, 999);
+
+  const [attendance, recordings] = await Promise.all([
+    db.attendance.findUnique({
+      where: { studentId_date: { studentId: studentId!, date: dayStart } },
+      include: { markedBy: { select: { name: true } } },
+    }),
+    db.recording.findMany({
+      where: {
+        studentId: studentId!,
+        deletedAt: null,
+        recordedAt: { gte: dayStart, lte: dayEnd },
+      },
+      orderBy: { recordedAt: "asc" },
+      include: {
+        qari: { select: { name: true } },
+        _count: { select: { mistakes: true } },
+      },
+    }),
+  ]);
+
+  return {
+    date: args.date,
+    student: studentDisplay,
+    attendance: attendance
+      ? {
+          status: attendance.status,
+          reason: attendance.reason,
+          markedBy: attendance.markedBy?.name ?? null,
+        }
+      : null,
+    sessionCount: recordings.length,
+    sessions: recordings.map((r) => ({
+      id: r.id,
+      time: fmtTime(new Date(r.recordedAt)),
+      surah: r.surahName,
+      ayahRange: `${r.ayahFrom}–${r.ayahTo}`,
+      paraFrom: r.paraFrom,
+      paraTo: r.paraTo,
+      durationFormatted: fmtDuration(r.durationMs),
+      reviewStatus: r.reviewStatus,
+      mistakeCount: r._count.mistakes,
+      qari: r.qari?.name ?? null,
+    })),
+  };
+}
+
 // -------- dispatcher --------
 
 export async function executeTool(
@@ -521,6 +803,14 @@ export async function executeTool(
         return await getUnreviewedRecordings();
       case "get_surah_history":
         return await getSurahHistory(args);
+      case "get_para_progress":
+        return await getParaProgress(args);
+      case "get_attendance":
+        return await getAttendance(args);
+      case "get_leaves":
+        return await getLeaves(args);
+      case "get_day_detail":
+        return await getDayDetail(args);
       default:
         return { error: `Unknown tool: ${name}` };
     }
@@ -530,13 +820,10 @@ export async function executeTool(
   }
 }
 
-export function listStudentsHint(): string {
-  // Helper used by the system prompt for context.
-  const names = new Set<string>();
-  SURAHS.slice(0, 1).forEach(() => names.add(""));
-  return Array.from(names).join("");
-}
-
 export function getSurahName(n: number): string | undefined {
   return getSurah(n)?.name;
+}
+
+export function listAllSurahs() {
+  return SURAHS.map((s) => ({ number: s.number, name: s.name }));
 }
