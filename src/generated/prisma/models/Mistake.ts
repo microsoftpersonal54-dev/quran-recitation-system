@@ -46,6 +46,7 @@ export type MistakeMinAggregateOutputType = {
   severity: string | null
   description: string | null
   correction: string | null
+  source: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +61,7 @@ export type MistakeMaxAggregateOutputType = {
   severity: string | null
   description: string | null
   correction: string | null
+  source: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,6 +76,7 @@ export type MistakeCountAggregateOutputType = {
   severity: number
   description: number
   correction: number
+  source: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -100,6 +103,7 @@ export type MistakeMinAggregateInputType = {
   severity?: true
   description?: true
   correction?: true
+  source?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -114,6 +118,7 @@ export type MistakeMaxAggregateInputType = {
   severity?: true
   description?: true
   correction?: true
+  source?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -128,6 +133,7 @@ export type MistakeCountAggregateInputType = {
   severity?: true
   description?: true
   correction?: true
+  source?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -229,6 +235,7 @@ export type MistakeGroupByOutputType = {
   severity: string
   description: string
   correction: string | null
+  source: string
   createdAt: Date
   updatedAt: Date
   _count: MistakeCountAggregateOutputType | null
@@ -266,6 +273,7 @@ export type MistakeWhereInput = {
   severity?: Prisma.StringFilter<"Mistake"> | string
   description?: Prisma.StringFilter<"Mistake"> | string
   correction?: Prisma.StringNullableFilter<"Mistake"> | string | null
+  source?: Prisma.StringFilter<"Mistake"> | string
   createdAt?: Prisma.DateTimeFilter<"Mistake"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Mistake"> | Date | string
   recording?: Prisma.XOR<Prisma.RecordingScalarRelationFilter, Prisma.RecordingWhereInput>
@@ -282,6 +290,7 @@ export type MistakeOrderByWithRelationInput = {
   severity?: Prisma.SortOrder
   description?: Prisma.SortOrder
   correction?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   recording?: Prisma.RecordingOrderByWithRelationInput
@@ -301,6 +310,7 @@ export type MistakeWhereUniqueInput = Prisma.AtLeast<{
   severity?: Prisma.StringFilter<"Mistake"> | string
   description?: Prisma.StringFilter<"Mistake"> | string
   correction?: Prisma.StringNullableFilter<"Mistake"> | string | null
+  source?: Prisma.StringFilter<"Mistake"> | string
   createdAt?: Prisma.DateTimeFilter<"Mistake"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Mistake"> | Date | string
   recording?: Prisma.XOR<Prisma.RecordingScalarRelationFilter, Prisma.RecordingWhereInput>
@@ -317,6 +327,7 @@ export type MistakeOrderByWithAggregationInput = {
   severity?: Prisma.SortOrder
   description?: Prisma.SortOrder
   correction?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MistakeCountOrderByAggregateInput
@@ -339,6 +350,7 @@ export type MistakeScalarWhereWithAggregatesInput = {
   severity?: Prisma.StringWithAggregatesFilter<"Mistake"> | string
   description?: Prisma.StringWithAggregatesFilter<"Mistake"> | string
   correction?: Prisma.StringNullableWithAggregatesFilter<"Mistake"> | string | null
+  source?: Prisma.StringWithAggregatesFilter<"Mistake"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Mistake"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Mistake"> | Date | string
 }
@@ -351,6 +363,7 @@ export type MistakeCreateInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   recording: Prisma.RecordingCreateNestedOneWithoutMistakesInput
@@ -367,6 +380,7 @@ export type MistakeUncheckedCreateInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -379,6 +393,7 @@ export type MistakeUpdateInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recording?: Prisma.RecordingUpdateOneRequiredWithoutMistakesNestedInput
@@ -395,6 +410,7 @@ export type MistakeUncheckedUpdateInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -409,6 +425,7 @@ export type MistakeCreateManyInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -421,6 +438,7 @@ export type MistakeUpdateManyMutationInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -435,6 +453,7 @@ export type MistakeUncheckedUpdateManyInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -459,6 +478,7 @@ export type MistakeCountOrderByAggregateInput = {
   severity?: Prisma.SortOrder
   description?: Prisma.SortOrder
   correction?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -478,6 +498,7 @@ export type MistakeMaxOrderByAggregateInput = {
   severity?: Prisma.SortOrder
   description?: Prisma.SortOrder
   correction?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -492,6 +513,7 @@ export type MistakeMinOrderByAggregateInput = {
   severity?: Prisma.SortOrder
   description?: Prisma.SortOrder
   correction?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -593,6 +615,7 @@ export type MistakeCreateWithoutReviewerInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   recording: Prisma.RecordingCreateNestedOneWithoutMistakesInput
@@ -607,6 +630,7 @@ export type MistakeUncheckedCreateWithoutReviewerInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -650,6 +674,7 @@ export type MistakeScalarWhereInput = {
   severity?: Prisma.StringFilter<"Mistake"> | string
   description?: Prisma.StringFilter<"Mistake"> | string
   correction?: Prisma.StringNullableFilter<"Mistake"> | string | null
+  source?: Prisma.StringFilter<"Mistake"> | string
   createdAt?: Prisma.DateTimeFilter<"Mistake"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Mistake"> | Date | string
 }
@@ -662,6 +687,7 @@ export type MistakeCreateWithoutRecordingInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   reviewer: Prisma.UserCreateNestedOneWithoutMistakesInput
@@ -676,6 +702,7 @@ export type MistakeUncheckedCreateWithoutRecordingInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -715,6 +742,7 @@ export type MistakeCreateManyReviewerInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -727,6 +755,7 @@ export type MistakeUpdateWithoutReviewerInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recording?: Prisma.RecordingUpdateOneRequiredWithoutMistakesNestedInput
@@ -741,6 +770,7 @@ export type MistakeUncheckedUpdateWithoutReviewerInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -754,6 +784,7 @@ export type MistakeUncheckedUpdateManyWithoutReviewerInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -767,6 +798,7 @@ export type MistakeCreateManyRecordingInput = {
   severity: string
   description: string
   correction?: string | null
+  source?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -779,6 +811,7 @@ export type MistakeUpdateWithoutRecordingInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewer?: Prisma.UserUpdateOneRequiredWithoutMistakesNestedInput
@@ -793,6 +826,7 @@ export type MistakeUncheckedUpdateWithoutRecordingInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -806,6 +840,7 @@ export type MistakeUncheckedUpdateManyWithoutRecordingInput = {
   severity?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   correction?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -822,6 +857,7 @@ export type MistakeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   severity?: boolean
   description?: boolean
   correction?: boolean
+  source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   recording?: boolean | Prisma.RecordingDefaultArgs<ExtArgs>
@@ -838,6 +874,7 @@ export type MistakeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   severity?: boolean
   description?: boolean
   correction?: boolean
+  source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   recording?: boolean | Prisma.RecordingDefaultArgs<ExtArgs>
@@ -854,6 +891,7 @@ export type MistakeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   severity?: boolean
   description?: boolean
   correction?: boolean
+  source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   recording?: boolean | Prisma.RecordingDefaultArgs<ExtArgs>
@@ -870,11 +908,12 @@ export type MistakeSelectScalar = {
   severity?: boolean
   description?: boolean
   correction?: boolean
+  source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MistakeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "recordingId" | "reviewerId" | "timestampMs" | "ayahNumber" | "category" | "severity" | "description" | "correction" | "createdAt" | "updatedAt", ExtArgs["result"]["mistake"]>
+export type MistakeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "recordingId" | "reviewerId" | "timestampMs" | "ayahNumber" | "category" | "severity" | "description" | "correction" | "source" | "createdAt" | "updatedAt", ExtArgs["result"]["mistake"]>
 export type MistakeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   recording?: boolean | Prisma.RecordingDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -904,6 +943,7 @@ export type $MistakePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     severity: string
     description: string
     correction: string | null
+    source: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["mistake"]>
@@ -1340,6 +1380,7 @@ export interface MistakeFieldRefs {
   readonly severity: Prisma.FieldRef<"Mistake", 'String'>
   readonly description: Prisma.FieldRef<"Mistake", 'String'>
   readonly correction: Prisma.FieldRef<"Mistake", 'String'>
+  readonly source: Prisma.FieldRef<"Mistake", 'String'>
   readonly createdAt: Prisma.FieldRef<"Mistake", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Mistake", 'DateTime'>
 }

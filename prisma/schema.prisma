@@ -14,7 +14,7 @@ model User {
   email        String   @unique
   name         String
   passwordHash String
-  role         String   // STUDENT | FATHER | QARI
+  role         String
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -48,8 +48,6 @@ model Session {
   @@index([expiresAt])
 }
 
-// ============ RECORDINGS ============
-
 model Recording {
   id            String    @id @default(cuid())
   studentId     String
@@ -61,6 +59,7 @@ model Recording {
   paraNumber    Int?
   paraFrom      Int?
   paraTo        Int?
+  paraQuarter   Int?
   durationMs    Int
   notes         String?
   filePath      String
@@ -77,7 +76,6 @@ model Recording {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Reserved for future audio analysis — NOT used in MVP.
   analysisStatus   String?
   transcription    String?
   detectedAyahs    String?
@@ -108,6 +106,7 @@ model Mistake {
   severity    String
   description String
   correction  String?
+  source      String   @default("REVIEWER")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -117,8 +116,6 @@ model Mistake {
   @@index([recordingId])
   @@index([category])
 }
-
-// ============ NOTIFICATIONS ============
 
 model Notification {
   id          String    @id @default(cuid())
@@ -136,8 +133,6 @@ model Notification {
   @@index([recipientId])
   @@index([readAt])
 }
-
-// ============ AUDIT & SETTINGS ============
 
 model AuditLog {
   id        String   @id @default(cuid())
@@ -174,14 +169,12 @@ model PushSubscription {
   @@index([userId])
 }
 
-// ============ ATTENDANCE & LEAVE ============
-
 model Attendance {
   id         String   @id @default(cuid())
   studentId  String
-  date       DateTime // normalized to midnight UTC
-  status     String   // PRESENT | LEAVE | ABSENT
-  reason     String?  // free-text reason (for LEAVE)
+  date       DateTime
+  status     String
+  reason     String?
   notes      String?
   markedById String?
   createdAt  DateTime @default(now())

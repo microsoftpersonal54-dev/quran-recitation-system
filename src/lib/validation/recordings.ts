@@ -9,6 +9,7 @@ export const createRecordingSchema = z
     paraNumber: z.number().int().min(1).max(30).nullable().optional(),
     paraFrom: z.number().int().min(1).max(30).nullable().optional(),
     paraTo: z.number().int().min(1).max(30).nullable().optional(),
+    paraQuarter: z.number().int().min(1).max(4).nullable().optional(),
     qariId: z.string().nullable().optional(),
     durationMs: z.number().int().min(100).max(4 * 60 * 60 * 1000),
     notes: z.string().max(2000).optional().default(""),

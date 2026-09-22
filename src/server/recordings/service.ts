@@ -10,7 +10,6 @@ import {
 } from "@/lib/storage/recordings-path";
 import type { CreateRecordingInput } from "@/lib/validation/recordings";
 
-// ---- Cloudinary configuration ----
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -18,10 +17,18 @@ cloudinary.config({
   secure: true,
 });
 
+export interface StudentMistakeInput {
+  timestampMs: number;
+  category: string;
+  severity: string;
+  description: string;
+}
+
 export interface CreateRecordingOptions extends CreateRecordingInput {
   studentId: string;
   fileBuffer: Buffer;
   mimeType: string;
+  studentMistakes?: StudentMistakeInput[];
 }
 
 export interface CreatedRecording {
@@ -33,11 +40,13 @@ export interface CreatedRecording {
   paraNumber: number | null;
   paraFrom: number | null;
   paraTo: number | null;
+  paraQuarter: number | null;
   qariId: string | null;
   durationMs: number;
   recordedAt: Date;
   uploadStatus: string;
   reviewStatus: string;
+  studentMistakeCount: number;
 }
 
 interface CloudinaryUploadResult {
@@ -96,7 +105,6 @@ export async function createRecording(
     .update(opts.fileBuffer)
     .digest("hex");
 
-  // 1. Upload to Cloudinary first.
   let upload: CloudinaryUploadResult;
   try {
     upload = await uploadToCloudinary(opts.fileBuffer, opts.mimeType);
@@ -105,7 +113,6 @@ export async function createRecording(
     throw new Error("UPLOAD_FAILED");
   }
 
-  // 2. Insert the DB row.
   try {
     const created = await db.recording.create({
       data: {
@@ -118,6 +125,7 @@ export async function createRecording(
         paraNumber: opts.paraNumber ?? null,
         paraFrom: opts.paraFrom ?? null,
         paraTo: opts.paraTo ?? null,
+        paraQuarter: opts.paraQuarter ?? null,
         durationMs: opts.durationMs,
         notes: opts.notes || null,
         filePath: upload.secure_url,
@@ -133,6 +141,35 @@ export async function createRecording(
       },
     });
 
+    // Insert student-suggested mistakes (if any).
+    let studentMistakeCount = 0;
+    if (opts.studentMistakes && opts.studentMistakes.length > 0) {
+      for (const m of opts.studentMistakes) {
+        if (!m.description || m.description.trim().length === 0) continue;
+        await db.mistake.create({
+          data: {
+            recordingId: created.id,
+            reviewerId: opts.studentId,
+            timestampMs: Math.max(0, Math.floor(m.timestampMs)),
+            ayahNumber: null,
+            category: m.category,
+            severity: m.severity,
+            description: m.description.trim(),
+            correction: null,
+            source: "STUDENT",
+          },
+        });
+        studentMistakeCount += 1;
+      }
+      // If any student mistakes were recorded, put the recording into IN_REVIEW.
+      if (studentMistakeCount > 0) {
+        await db.recording.update({
+          where: { id: created.id },
+          data: { reviewStatus: "IN_REVIEW" },
+        });
+      }
+    }
+
     return {
       id: created.id,
       surahNumber: created.surahNumber,
@@ -142,11 +179,14 @@ export async function createRecording(
       paraNumber: created.paraNumber,
       paraFrom: created.paraFrom,
       paraTo: created.paraTo,
+      paraQuarter: created.paraQuarter,
       qariId: created.qariId,
       durationMs: created.durationMs,
       recordedAt: created.recordedAt,
       uploadStatus: created.uploadStatus,
-      reviewStatus: created.reviewStatus,
+      reviewStatus:
+        studentMistakeCount > 0 ? "IN_REVIEW" : created.reviewStatus,
+      studentMistakeCount,
     };
   } catch (err) {
     await cloudinary.uploader
@@ -169,6 +209,7 @@ export async function listRecordingsForStudent(studentId: string) {
       paraNumber: true,
       paraFrom: true,
       paraTo: true,
+      paraQuarter: true,
       qariId: true,
       durationMs: true,
       notes: true,

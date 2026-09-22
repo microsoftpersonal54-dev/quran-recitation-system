@@ -4,6 +4,7 @@ import { createRecordingSchema } from "@/lib/validation/recordings";
 import {
   createRecording,
   listRecordingsForStudent,
+  StudentMistakeInput,
 } from "@/server/recordings/service";
 import { audit } from "@/server/audit";
 import { createNotification } from "@/server/notifications/service";
@@ -14,7 +15,7 @@ import { getParasForRange } from "@/lib/quran/paras";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_UPLOAD_FIELD_BYTES = 51 * 1024 * 1024; // ~51 MB safety margin
+const MAX_UPLOAD_FIELD_BYTES = 51 * 1024 * 1024;
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -22,7 +23,6 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  // Student sees their own; Father/Qari see everything.
   if (user.role === "STUDENT") {
     const items = await listRecordingsForStudent(user.id);
     return NextResponse.json({ items });
@@ -47,6 +47,7 @@ async function listAllRecordings() {
       paraNumber: true,
       paraFrom: true,
       paraTo: true,
+      paraQuarter: true,
       durationMs: true,
       notes: true,
       mimeType: true,
@@ -105,8 +106,9 @@ export async function POST(req: NextRequest) {
   const surahNumber = Number(form.get("surahNumber"));
   const ayahFrom = Number(form.get("ayahFrom"));
   const ayahTo = Number(form.get("ayahTo"));
+  const paraQuarterRaw = form.get("paraQuarter");
+  const paraQuarter = paraQuarterRaw ? Number(paraQuarterRaw) : null;
 
-  // Auto-compute Paras from the surah/ayah range if not supplied.
   let paraFrom: number | null = null;
   let paraTo: number | null = null;
   let paraNumber: number | null = null;
@@ -131,6 +133,28 @@ export async function POST(req: NextRequest) {
       ? qariIdRaw.trim()
       : null;
 
+  // Parse student mistakes.
+  const mistakesRaw = form.get("studentMistakes");
+  let studentMistakes: StudentMistakeInput[] = [];
+  if (typeof mistakesRaw === "string" && mistakesRaw.trim().length > 0) {
+    try {
+      const parsed = JSON.parse(mistakesRaw) as unknown;
+      if (Array.isArray(parsed)) {
+        studentMistakes = parsed
+          .filter(
+            (m): m is StudentMistakeInput =>
+              typeof m === "object" &&
+              m !== null &&
+              typeof (m as StudentMistakeInput).description === "string" &&
+              typeof (m as StudentMistakeInput).timestampMs === "number"
+          )
+          .slice(0, 20);
+      }
+    } catch {
+      studentMistakes = [];
+    }
+  }
+
   const meta = {
     surahNumber,
     ayahFrom,
@@ -138,6 +162,7 @@ export async function POST(req: NextRequest) {
     paraNumber,
     paraFrom,
     paraTo,
+    paraQuarter,
     qariId,
     durationMs: Number(form.get("durationMs")),
     notes: String(form.get("notes") ?? ""),
@@ -160,11 +185,10 @@ export async function POST(req: NextRequest) {
       studentId: user.id,
       fileBuffer: buf,
       mimeType: mime,
+      studentMistakes,
       ...parsed.data,
     });
 
-    // Notify all Father and Qari accounts — but ONLY after the recording
-    // row was successfully inserted. Never notify on failed saves.
     const recipients = await db.user.findMany({
       where: { active: true, role: { in: ["FATHER", "QARI"] } },
       select: { id: true },
@@ -175,14 +199,22 @@ export async function POST(req: NextRequest) {
     const paraLabel =
       created.paraFrom && created.paraTo
         ? created.paraFrom === created.paraTo
-          ? `Para ${created.paraFrom}`
+          ? `Para ${created.paraFrom}${
+              created.paraQuarter ? ` (${created.paraQuarter}/4)` : ""
+            }`
           : `Paras ${created.paraFrom}–${created.paraTo}`
         : "";
+    const mistakeNote =
+      created.studentMistakeCount > 0
+        ? ` · ${created.studentMistakeCount} note${
+            created.studentMistakeCount === 1 ? "" : "s"
+          } by student`
+        : "";
+
     const notificationBody = `${user.name} · ${created.surahName} · Ayahs ${ayahRange}${
       paraLabel ? ` · ${paraLabel}` : ""
-    } · ${durationLabel}`;
+    } · ${durationLabel}${mistakeNote}`;
 
-    // 1) In-app notification (bell icon / Alerts tab)
     await Promise.all(
       recipients.map((r) =>
         createNotification({
@@ -195,7 +227,6 @@ export async function POST(req: NextRequest) {
       )
     );
 
-    // 2) Push notification (mobile popup in notification center).
     const pushPayload = {
       title: "New Quran Recitation",
       body: notificationBody,
@@ -220,8 +251,10 @@ export async function POST(req: NextRequest) {
         ayahTo: created.ayahTo,
         paraFrom: created.paraFrom,
         paraTo: created.paraTo,
+        paraQuarter: created.paraQuarter,
         qariId: created.qariId,
         durationMs: created.durationMs,
+        studentMistakeCount: created.studentMistakeCount,
         size: buf.byteLength,
         mime,
       },

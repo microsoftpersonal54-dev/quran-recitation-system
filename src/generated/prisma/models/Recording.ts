@@ -33,6 +33,7 @@ export type RecordingAvgAggregateOutputType = {
   paraNumber: number | null
   paraFrom: number | null
   paraTo: number | null
+  paraQuarter: number | null
   durationMs: number | null
   fileSizeBytes: number | null
   confidence: number | null
@@ -45,6 +46,7 @@ export type RecordingSumAggregateOutputType = {
   paraNumber: number | null
   paraFrom: number | null
   paraTo: number | null
+  paraQuarter: number | null
   durationMs: number | null
   fileSizeBytes: number | null
   confidence: number | null
@@ -61,6 +63,7 @@ export type RecordingMinAggregateOutputType = {
   paraNumber: number | null
   paraFrom: number | null
   paraTo: number | null
+  paraQuarter: number | null
   durationMs: number | null
   notes: string | null
   filePath: string | null
@@ -96,6 +99,7 @@ export type RecordingMaxAggregateOutputType = {
   paraNumber: number | null
   paraFrom: number | null
   paraTo: number | null
+  paraQuarter: number | null
   durationMs: number | null
   notes: string | null
   filePath: string | null
@@ -131,6 +135,7 @@ export type RecordingCountAggregateOutputType = {
   paraNumber: number
   paraFrom: number
   paraTo: number
+  paraQuarter: number
   durationMs: number
   notes: number
   filePath: number
@@ -164,6 +169,7 @@ export type RecordingAvgAggregateInputType = {
   paraNumber?: true
   paraFrom?: true
   paraTo?: true
+  paraQuarter?: true
   durationMs?: true
   fileSizeBytes?: true
   confidence?: true
@@ -176,6 +182,7 @@ export type RecordingSumAggregateInputType = {
   paraNumber?: true
   paraFrom?: true
   paraTo?: true
+  paraQuarter?: true
   durationMs?: true
   fileSizeBytes?: true
   confidence?: true
@@ -192,6 +199,7 @@ export type RecordingMinAggregateInputType = {
   paraNumber?: true
   paraFrom?: true
   paraTo?: true
+  paraQuarter?: true
   durationMs?: true
   notes?: true
   filePath?: true
@@ -227,6 +235,7 @@ export type RecordingMaxAggregateInputType = {
   paraNumber?: true
   paraFrom?: true
   paraTo?: true
+  paraQuarter?: true
   durationMs?: true
   notes?: true
   filePath?: true
@@ -262,6 +271,7 @@ export type RecordingCountAggregateInputType = {
   paraNumber?: true
   paraFrom?: true
   paraTo?: true
+  paraQuarter?: true
   durationMs?: true
   notes?: true
   filePath?: true
@@ -384,6 +394,7 @@ export type RecordingGroupByOutputType = {
   paraNumber: number | null
   paraFrom: number | null
   paraTo: number | null
+  paraQuarter: number | null
   durationMs: number
   notes: string | null
   filePath: string
@@ -442,6 +453,7 @@ export type RecordingWhereInput = {
   paraNumber?: Prisma.IntNullableFilter<"Recording"> | number | null
   paraFrom?: Prisma.IntNullableFilter<"Recording"> | number | null
   paraTo?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraQuarter?: Prisma.IntNullableFilter<"Recording"> | number | null
   durationMs?: Prisma.IntFilter<"Recording"> | number
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
   filePath?: Prisma.StringFilter<"Recording"> | string
@@ -481,6 +493,7 @@ export type RecordingOrderByWithRelationInput = {
   paraNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   paraFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   paraTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -523,6 +536,7 @@ export type RecordingWhereUniqueInput = Prisma.AtLeast<{
   paraNumber?: Prisma.IntNullableFilter<"Recording"> | number | null
   paraFrom?: Prisma.IntNullableFilter<"Recording"> | number | null
   paraTo?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraQuarter?: Prisma.IntNullableFilter<"Recording"> | number | null
   durationMs?: Prisma.IntFilter<"Recording"> | number
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
   filePath?: Prisma.StringFilter<"Recording"> | string
@@ -562,6 +576,7 @@ export type RecordingOrderByWithAggregationInput = {
   paraNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   paraFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   paraTo?: Prisma.SortOrderInput | Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -605,6 +620,7 @@ export type RecordingScalarWhereWithAggregatesInput = {
   paraNumber?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
   paraFrom?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
   paraTo?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
+  paraQuarter?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
   durationMs?: Prisma.IntWithAggregatesFilter<"Recording"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"Recording"> | string | null
   filePath?: Prisma.StringWithAggregatesFilter<"Recording"> | string
@@ -638,6 +654,7 @@ export type RecordingCreateInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -677,6 +694,7 @@ export type RecordingUncheckedCreateInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -712,6 +730,7 @@ export type RecordingUpdateInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -751,6 +770,7 @@ export type RecordingUncheckedUpdateInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -788,6 +808,7 @@ export type RecordingCreateManyInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -821,6 +842,7 @@ export type RecordingUpdateManyMutationInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -856,6 +878,7 @@ export type RecordingUncheckedUpdateManyInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -901,6 +924,7 @@ export type RecordingCountOrderByAggregateInput = {
   paraNumber?: Prisma.SortOrder
   paraFrom?: Prisma.SortOrder
   paraTo?: Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -932,6 +956,7 @@ export type RecordingAvgOrderByAggregateInput = {
   paraNumber?: Prisma.SortOrder
   paraFrom?: Prisma.SortOrder
   paraTo?: Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   fileSizeBytes?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
@@ -948,6 +973,7 @@ export type RecordingMaxOrderByAggregateInput = {
   paraNumber?: Prisma.SortOrder
   paraFrom?: Prisma.SortOrder
   paraTo?: Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -983,6 +1009,7 @@ export type RecordingMinOrderByAggregateInput = {
   paraNumber?: Prisma.SortOrder
   paraFrom?: Prisma.SortOrder
   paraTo?: Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -1014,6 +1041,7 @@ export type RecordingSumOrderByAggregateInput = {
   paraNumber?: Prisma.SortOrder
   paraFrom?: Prisma.SortOrder
   paraTo?: Prisma.SortOrder
+  paraQuarter?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   fileSizeBytes?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
@@ -1176,6 +1204,7 @@ export type RecordingCreateWithoutStudentInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1213,6 +1242,7 @@ export type RecordingUncheckedCreateWithoutStudentInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1258,6 +1288,7 @@ export type RecordingCreateWithoutQariInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1295,6 +1326,7 @@ export type RecordingUncheckedCreateWithoutQariInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1361,6 +1393,7 @@ export type RecordingScalarWhereInput = {
   paraNumber?: Prisma.IntNullableFilter<"Recording"> | number | null
   paraFrom?: Prisma.IntNullableFilter<"Recording"> | number | null
   paraTo?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraQuarter?: Prisma.IntNullableFilter<"Recording"> | number | null
   durationMs?: Prisma.IntFilter<"Recording"> | number
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
   filePath?: Prisma.StringFilter<"Recording"> | string
@@ -1410,6 +1443,7 @@ export type RecordingCreateWithoutMistakesInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1448,6 +1482,7 @@ export type RecordingUncheckedCreateWithoutMistakesInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1498,6 +1533,7 @@ export type RecordingUpdateWithoutMistakesInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1536,6 +1572,7 @@ export type RecordingUncheckedUpdateWithoutMistakesInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1570,6 +1607,7 @@ export type RecordingCreateWithoutNotificationsInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1608,6 +1646,7 @@ export type RecordingUncheckedCreateWithoutNotificationsInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1658,6 +1697,7 @@ export type RecordingUpdateWithoutNotificationsInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1696,6 +1736,7 @@ export type RecordingUncheckedUpdateWithoutNotificationsInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1731,6 +1772,7 @@ export type RecordingCreateManyStudentInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1765,6 +1807,7 @@ export type RecordingCreateManyQariInput = {
   paraNumber?: number | null
   paraFrom?: number | null
   paraTo?: number | null
+  paraQuarter?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1798,6 +1841,7 @@ export type RecordingUpdateWithoutStudentInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1835,6 +1879,7 @@ export type RecordingUncheckedUpdateWithoutStudentInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1871,6 +1916,7 @@ export type RecordingUncheckedUpdateManyWithoutStudentInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1904,6 +1950,7 @@ export type RecordingUpdateWithoutQariInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1941,6 +1988,7 @@ export type RecordingUncheckedUpdateWithoutQariInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1977,6 +2025,7 @@ export type RecordingUncheckedUpdateManyWithoutQariInput = {
   paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraQuarter?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2052,6 +2101,7 @@ export type RecordingSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   paraNumber?: boolean
   paraFrom?: boolean
   paraTo?: boolean
+  paraQuarter?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -2092,6 +2142,7 @@ export type RecordingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   paraNumber?: boolean
   paraFrom?: boolean
   paraTo?: boolean
+  paraQuarter?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -2129,6 +2180,7 @@ export type RecordingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   paraNumber?: boolean
   paraFrom?: boolean
   paraTo?: boolean
+  paraQuarter?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -2166,6 +2218,7 @@ export type RecordingSelectScalar = {
   paraNumber?: boolean
   paraFrom?: boolean
   paraTo?: boolean
+  paraQuarter?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -2190,7 +2243,7 @@ export type RecordingSelectScalar = {
   analysisVersion?: boolean
 }
 
-export type RecordingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "qariId" | "surahNumber" | "surahName" | "ayahFrom" | "ayahTo" | "paraNumber" | "paraFrom" | "paraTo" | "durationMs" | "notes" | "filePath" | "fileName" | "mimeType" | "fileSizeBytes" | "checksum" | "uploadStatus" | "reviewStatus" | "recordedAt" | "uploadedAt" | "timezone" | "deletedAt" | "createdAt" | "updatedAt" | "analysisStatus" | "transcription" | "detectedAyahs" | "confidence" | "detectedIssues" | "analysisProvider" | "analysisVersion", ExtArgs["result"]["recording"]>
+export type RecordingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "qariId" | "surahNumber" | "surahName" | "ayahFrom" | "ayahTo" | "paraNumber" | "paraFrom" | "paraTo" | "paraQuarter" | "durationMs" | "notes" | "filePath" | "fileName" | "mimeType" | "fileSizeBytes" | "checksum" | "uploadStatus" | "reviewStatus" | "recordedAt" | "uploadedAt" | "timezone" | "deletedAt" | "createdAt" | "updatedAt" | "analysisStatus" | "transcription" | "detectedAyahs" | "confidence" | "detectedIssues" | "analysisProvider" | "analysisVersion", ExtArgs["result"]["recording"]>
 export type RecordingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
@@ -2226,6 +2279,7 @@ export type $RecordingPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     paraNumber: number | null
     paraFrom: number | null
     paraTo: number | null
+    paraQuarter: number | null
     durationMs: number
     notes: string | null
     filePath: string
@@ -2685,6 +2739,7 @@ export interface RecordingFieldRefs {
   readonly paraNumber: Prisma.FieldRef<"Recording", 'Int'>
   readonly paraFrom: Prisma.FieldRef<"Recording", 'Int'>
   readonly paraTo: Prisma.FieldRef<"Recording", 'Int'>
+  readonly paraQuarter: Prisma.FieldRef<"Recording", 'Int'>
   readonly durationMs: Prisma.FieldRef<"Recording", 'Int'>
   readonly notes: Prisma.FieldRef<"Recording", 'String'>
   readonly filePath: Prisma.FieldRef<"Recording", 'String'>

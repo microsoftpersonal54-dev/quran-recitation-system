@@ -1169,6 +1169,7 @@ export const RecordingScalarFieldEnum = {
   paraNumber: 'paraNumber',
   paraFrom: 'paraFrom',
   paraTo: 'paraTo',
+  paraQuarter: 'paraQuarter',
   durationMs: 'durationMs',
   notes: 'notes',
   filePath: 'filePath',
@@ -1206,6 +1207,7 @@ export const MistakeScalarFieldEnum = {
   severity: 'severity',
   description: 'description',
   correction: 'correction',
+  source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
