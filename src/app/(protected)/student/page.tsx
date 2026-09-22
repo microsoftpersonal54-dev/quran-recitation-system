@@ -3,8 +3,8 @@ import { Mic } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import LogoutButton from "@/components/LogoutButton";
 import RecordingListItem from "@/components/student/RecordingListItem";
-import { listRecordingsForStudent } from "@/server/recordings/service";
 import PendingUploads from "@/components/student/PendingUploads";
+import { listRecordingsForStudent } from "@/server/recordings/service";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +43,8 @@ export default async function StudentHome() {
         </span>
       </Link>
 
+      <PendingUploads />
+
       <section className="mt-8">
         <h2 className="text-sm font-semibold text-neutral-800">
           Your recordings
@@ -68,6 +70,9 @@ export default async function StudentHome() {
                   surahName: item.surahName,
                   ayahFrom: item.ayahFrom,
                   ayahTo: item.ayahTo,
+                  paraFrom: item.paraFrom,
+                  paraTo: item.paraTo,
+                  paraQuarter: item.paraQuarter,
                   durationMs: item.durationMs,
                   recordedAt: item.recordedAt.toISOString(),
                   uploadStatus: item.uploadStatus,
@@ -78,8 +83,6 @@ export default async function StudentHome() {
           </ul>
         )}
       </section>
-
-            <PendingUploads />
 
       <div className="mt-10">
         <LogoutButton />

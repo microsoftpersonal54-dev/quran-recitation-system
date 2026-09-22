@@ -3,9 +3,17 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { getRecordingById } from "@/server/recordings/service";
 import { db } from "@/lib/db";
 import { audit } from "@/server/audit";
+import { v2 as cloudinary } from "cloudinary";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 
 export async function GET(
   _req: NextRequest,
@@ -40,6 +48,10 @@ export async function GET(
       surahName: rec.surahName,
       ayahFrom: rec.ayahFrom,
       ayahTo: rec.ayahTo,
+      paraFrom: rec.paraFrom,
+      paraTo: rec.paraTo,
+      paraQuarter: rec.paraQuarter,
+      qariId: rec.qariId,
       durationMs: rec.durationMs,
       notes: rec.notes,
       mimeType: rec.mimeType,
@@ -68,25 +80,33 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
 
-  // Only the Father or the owning student can delete.
   const allowed =
     user.role === "FATHER" ||
     (user.role === "STUDENT" && rec.studentId === user.id);
+
   if (!allowed) {
     return NextResponse.json({ error: "Forbidden." }, { status: 403 });
   }
 
-  // Soft delete: keep the row + file for recovery, just hide it.
-  await db.recording.update({
-    where: { id: rec.id },
-    data: { deletedAt: new Date() },
-  });
+  // Delete from Cloudinary first (best effort — don't block DB delete).
+  if (rec.fileName && rec.fileName.length > 0) {
+    try {
+      await cloudinary.uploader.destroy(rec.fileName, {
+        resource_type: "video",
+      });
+    } catch (err) {
+      console.warn("[recordings] Cloudinary delete failed", err);
+    }
+  }
+
+  // Hard delete the DB row (mistakes cascade via schema onDelete).
+  await db.recording.delete({ where: { id: rec.id } });
 
   await audit({
     userId: user.id,
     action: "recording.deleted",
     target: rec.id,
-    metadata: { soft: true },
+    metadata: { hard: true },
   });
 
   return NextResponse.json({ ok: true });
