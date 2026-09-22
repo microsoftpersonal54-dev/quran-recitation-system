@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardList, Bell } from "lucide-react";
+import { ClipboardList, CalendarDays, Bell } from "lucide-react";
 
 interface Props {
   unreadCount?: number;
@@ -13,6 +13,7 @@ export default function QariNav({ unreadCount = 0 }: Props) {
 
   const items = [
     { href: "/qari", label: "Review", Icon: ClipboardList },
+    { href: "/qari/attendance", label: "Calendar", Icon: CalendarDays },
     {
       href: "/qari/notifications",
       label: "Alerts",

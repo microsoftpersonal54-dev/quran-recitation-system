@@ -7,6 +7,7 @@ import {
   FileAudio,
   TrendingUp,
   Sparkles,
+  CalendarDays,
   Bell,
 } from "lucide-react";
 
@@ -19,8 +20,9 @@ export default function FatherNav({ unreadCount }: Props) {
 
   const items = [
     { href: "/father", label: "Home", Icon: LayoutDashboard },
-    { href: "/father/recordings", label: "Recordings", Icon: FileAudio },
-    { href: "/father/progress", label: "Progress", Icon: TrendingUp },
+    { href: "/father/recordings", label: "Recs", Icon: FileAudio },
+    { href: "/father/attendance", label: "Calendar", Icon: CalendarDays },
+    { href: "/father/progress", label: "Stats", Icon: TrendingUp },
     { href: "/father/ai", label: "AI", Icon: Sparkles },
     {
       href: "/father/notifications",
@@ -46,7 +48,7 @@ export default function FatherNav({ unreadCount }: Props) {
             <li key={href} className="flex-1">
               <Link
                 href={href}
-                className={`relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] ${
+                className={`relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 px-0.5 py-2 text-[9px] ${
                   active
                     ? "text-neutral-900"
                     : "text-neutral-500 hover:text-neutral-800"
@@ -59,10 +61,7 @@ export default function FatherNav({ unreadCount }: Props) {
                     aria-hidden
                   />
                   {badge != null && badge > 0 && (
-                    <span
-                      className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white"
-                      aria-label={`${badge} unread`}
-                    >
+                    <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-bold text-white">
                       {badge > 9 ? "9+" : badge}
                     </span>
                   )}
