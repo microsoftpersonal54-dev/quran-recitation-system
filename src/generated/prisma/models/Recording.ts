@@ -30,6 +30,9 @@ export type RecordingAvgAggregateOutputType = {
   surahNumber: number | null
   ayahFrom: number | null
   ayahTo: number | null
+  paraNumber: number | null
+  paraFrom: number | null
+  paraTo: number | null
   durationMs: number | null
   fileSizeBytes: number | null
   confidence: number | null
@@ -39,6 +42,9 @@ export type RecordingSumAggregateOutputType = {
   surahNumber: number | null
   ayahFrom: number | null
   ayahTo: number | null
+  paraNumber: number | null
+  paraFrom: number | null
+  paraTo: number | null
   durationMs: number | null
   fileSizeBytes: number | null
   confidence: number | null
@@ -47,10 +53,14 @@ export type RecordingSumAggregateOutputType = {
 export type RecordingMinAggregateOutputType = {
   id: string | null
   studentId: string | null
+  qariId: string | null
   surahNumber: number | null
   surahName: string | null
   ayahFrom: number | null
   ayahTo: number | null
+  paraNumber: number | null
+  paraFrom: number | null
+  paraTo: number | null
   durationMs: number | null
   notes: string | null
   filePath: string | null
@@ -78,10 +88,14 @@ export type RecordingMinAggregateOutputType = {
 export type RecordingMaxAggregateOutputType = {
   id: string | null
   studentId: string | null
+  qariId: string | null
   surahNumber: number | null
   surahName: string | null
   ayahFrom: number | null
   ayahTo: number | null
+  paraNumber: number | null
+  paraFrom: number | null
+  paraTo: number | null
   durationMs: number | null
   notes: string | null
   filePath: string | null
@@ -109,10 +123,14 @@ export type RecordingMaxAggregateOutputType = {
 export type RecordingCountAggregateOutputType = {
   id: number
   studentId: number
+  qariId: number
   surahNumber: number
   surahName: number
   ayahFrom: number
   ayahTo: number
+  paraNumber: number
+  paraFrom: number
+  paraTo: number
   durationMs: number
   notes: number
   filePath: number
@@ -143,6 +161,9 @@ export type RecordingAvgAggregateInputType = {
   surahNumber?: true
   ayahFrom?: true
   ayahTo?: true
+  paraNumber?: true
+  paraFrom?: true
+  paraTo?: true
   durationMs?: true
   fileSizeBytes?: true
   confidence?: true
@@ -152,6 +173,9 @@ export type RecordingSumAggregateInputType = {
   surahNumber?: true
   ayahFrom?: true
   ayahTo?: true
+  paraNumber?: true
+  paraFrom?: true
+  paraTo?: true
   durationMs?: true
   fileSizeBytes?: true
   confidence?: true
@@ -160,10 +184,14 @@ export type RecordingSumAggregateInputType = {
 export type RecordingMinAggregateInputType = {
   id?: true
   studentId?: true
+  qariId?: true
   surahNumber?: true
   surahName?: true
   ayahFrom?: true
   ayahTo?: true
+  paraNumber?: true
+  paraFrom?: true
+  paraTo?: true
   durationMs?: true
   notes?: true
   filePath?: true
@@ -191,10 +219,14 @@ export type RecordingMinAggregateInputType = {
 export type RecordingMaxAggregateInputType = {
   id?: true
   studentId?: true
+  qariId?: true
   surahNumber?: true
   surahName?: true
   ayahFrom?: true
   ayahTo?: true
+  paraNumber?: true
+  paraFrom?: true
+  paraTo?: true
   durationMs?: true
   notes?: true
   filePath?: true
@@ -222,10 +254,14 @@ export type RecordingMaxAggregateInputType = {
 export type RecordingCountAggregateInputType = {
   id?: true
   studentId?: true
+  qariId?: true
   surahNumber?: true
   surahName?: true
   ayahFrom?: true
   ayahTo?: true
+  paraNumber?: true
+  paraFrom?: true
+  paraTo?: true
   durationMs?: true
   notes?: true
   filePath?: true
@@ -340,10 +376,14 @@ export type RecordingGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type RecordingGroupByOutputType = {
   id: string
   studentId: string
+  qariId: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber: number | null
+  paraFrom: number | null
+  paraTo: number | null
   durationMs: number
   notes: string | null
   filePath: string
@@ -394,10 +434,14 @@ export type RecordingWhereInput = {
   NOT?: Prisma.RecordingWhereInput | Prisma.RecordingWhereInput[]
   id?: Prisma.StringFilter<"Recording"> | string
   studentId?: Prisma.StringFilter<"Recording"> | string
+  qariId?: Prisma.StringNullableFilter<"Recording"> | string | null
   surahNumber?: Prisma.IntFilter<"Recording"> | number
   surahName?: Prisma.StringFilter<"Recording"> | string
   ayahFrom?: Prisma.IntFilter<"Recording"> | number
   ayahTo?: Prisma.IntFilter<"Recording"> | number
+  paraNumber?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraFrom?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraTo?: Prisma.IntNullableFilter<"Recording"> | number | null
   durationMs?: Prisma.IntFilter<"Recording"> | number
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
   filePath?: Prisma.StringFilter<"Recording"> | string
@@ -421,6 +465,7 @@ export type RecordingWhereInput = {
   analysisProvider?: Prisma.StringNullableFilter<"Recording"> | string | null
   analysisVersion?: Prisma.StringNullableFilter<"Recording"> | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  qari?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   mistakes?: Prisma.MistakeListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
 }
@@ -428,10 +473,14 @@ export type RecordingWhereInput = {
 export type RecordingOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  qariId?: Prisma.SortOrderInput | Prisma.SortOrder
   surahNumber?: Prisma.SortOrder
   surahName?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  paraFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  paraTo?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -455,6 +504,7 @@ export type RecordingOrderByWithRelationInput = {
   analysisProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   analysisVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   student?: Prisma.UserOrderByWithRelationInput
+  qari?: Prisma.UserOrderByWithRelationInput
   mistakes?: Prisma.MistakeOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
 }
@@ -465,10 +515,14 @@ export type RecordingWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.RecordingWhereInput[]
   NOT?: Prisma.RecordingWhereInput | Prisma.RecordingWhereInput[]
   studentId?: Prisma.StringFilter<"Recording"> | string
+  qariId?: Prisma.StringNullableFilter<"Recording"> | string | null
   surahNumber?: Prisma.IntFilter<"Recording"> | number
   surahName?: Prisma.StringFilter<"Recording"> | string
   ayahFrom?: Prisma.IntFilter<"Recording"> | number
   ayahTo?: Prisma.IntFilter<"Recording"> | number
+  paraNumber?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraFrom?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraTo?: Prisma.IntNullableFilter<"Recording"> | number | null
   durationMs?: Prisma.IntFilter<"Recording"> | number
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
   filePath?: Prisma.StringFilter<"Recording"> | string
@@ -492,6 +546,7 @@ export type RecordingWhereUniqueInput = Prisma.AtLeast<{
   analysisProvider?: Prisma.StringNullableFilter<"Recording"> | string | null
   analysisVersion?: Prisma.StringNullableFilter<"Recording"> | string | null
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  qari?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   mistakes?: Prisma.MistakeListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
 }, "id">
@@ -499,10 +554,14 @@ export type RecordingWhereUniqueInput = Prisma.AtLeast<{
 export type RecordingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  qariId?: Prisma.SortOrderInput | Prisma.SortOrder
   surahNumber?: Prisma.SortOrder
   surahName?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  paraFrom?: Prisma.SortOrderInput | Prisma.SortOrder
+  paraTo?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -538,10 +597,14 @@ export type RecordingScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RecordingScalarWhereWithAggregatesInput | Prisma.RecordingScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Recording"> | string
   studentId?: Prisma.StringWithAggregatesFilter<"Recording"> | string
+  qariId?: Prisma.StringNullableWithAggregatesFilter<"Recording"> | string | null
   surahNumber?: Prisma.IntWithAggregatesFilter<"Recording"> | number
   surahName?: Prisma.StringWithAggregatesFilter<"Recording"> | string
   ayahFrom?: Prisma.IntWithAggregatesFilter<"Recording"> | number
   ayahTo?: Prisma.IntWithAggregatesFilter<"Recording"> | number
+  paraNumber?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
+  paraFrom?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
+  paraTo?: Prisma.IntNullableWithAggregatesFilter<"Recording"> | number | null
   durationMs?: Prisma.IntWithAggregatesFilter<"Recording"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"Recording"> | string | null
   filePath?: Prisma.StringWithAggregatesFilter<"Recording"> | string
@@ -572,6 +635,9 @@ export type RecordingCreateInput = {
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -595,6 +661,7 @@ export type RecordingCreateInput = {
   analysisProvider?: string | null
   analysisVersion?: string | null
   student: Prisma.UserCreateNestedOneWithoutRecordingsInput
+  qari?: Prisma.UserCreateNestedOneWithoutQariSessionsInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutRecordingInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecordingInput
 }
@@ -602,10 +669,14 @@ export type RecordingCreateInput = {
 export type RecordingUncheckedCreateInput = {
   id?: string
   studentId: string
+  qariId?: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -638,6 +709,9 @@ export type RecordingUpdateInput = {
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -661,6 +735,7 @@ export type RecordingUpdateInput = {
   analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutRecordingsNestedInput
+  qari?: Prisma.UserUpdateOneWithoutQariSessionsNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutRecordingNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecordingNestedInput
 }
@@ -668,10 +743,14 @@ export type RecordingUpdateInput = {
 export type RecordingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  qariId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -701,10 +780,14 @@ export type RecordingUncheckedUpdateInput = {
 export type RecordingCreateManyInput = {
   id?: string
   studentId: string
+  qariId?: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -735,6 +818,9 @@ export type RecordingUpdateManyMutationInput = {
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -762,10 +848,14 @@ export type RecordingUpdateManyMutationInput = {
 export type RecordingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  qariId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -803,10 +893,14 @@ export type RecordingOrderByRelationAggregateInput = {
 export type RecordingCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  qariId?: Prisma.SortOrder
   surahNumber?: Prisma.SortOrder
   surahName?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrder
+  paraFrom?: Prisma.SortOrder
+  paraTo?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -835,6 +929,9 @@ export type RecordingAvgOrderByAggregateInput = {
   surahNumber?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrder
+  paraFrom?: Prisma.SortOrder
+  paraTo?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   fileSizeBytes?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
@@ -843,10 +940,14 @@ export type RecordingAvgOrderByAggregateInput = {
 export type RecordingMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  qariId?: Prisma.SortOrder
   surahNumber?: Prisma.SortOrder
   surahName?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrder
+  paraFrom?: Prisma.SortOrder
+  paraTo?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -874,10 +975,14 @@ export type RecordingMaxOrderByAggregateInput = {
 export type RecordingMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  qariId?: Prisma.SortOrder
   surahNumber?: Prisma.SortOrder
   surahName?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrder
+  paraFrom?: Prisma.SortOrder
+  paraTo?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
@@ -906,6 +1011,9 @@ export type RecordingSumOrderByAggregateInput = {
   surahNumber?: Prisma.SortOrder
   ayahFrom?: Prisma.SortOrder
   ayahTo?: Prisma.SortOrder
+  paraNumber?: Prisma.SortOrder
+  paraFrom?: Prisma.SortOrder
+  paraTo?: Prisma.SortOrder
   durationMs?: Prisma.SortOrder
   fileSizeBytes?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
@@ -928,10 +1036,24 @@ export type RecordingCreateNestedManyWithoutStudentInput = {
   connect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
 }
 
+export type RecordingCreateNestedManyWithoutQariInput = {
+  create?: Prisma.XOR<Prisma.RecordingCreateWithoutQariInput, Prisma.RecordingUncheckedCreateWithoutQariInput> | Prisma.RecordingCreateWithoutQariInput[] | Prisma.RecordingUncheckedCreateWithoutQariInput[]
+  connectOrCreate?: Prisma.RecordingCreateOrConnectWithoutQariInput | Prisma.RecordingCreateOrConnectWithoutQariInput[]
+  createMany?: Prisma.RecordingCreateManyQariInputEnvelope
+  connect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+}
+
 export type RecordingUncheckedCreateNestedManyWithoutStudentInput = {
   create?: Prisma.XOR<Prisma.RecordingCreateWithoutStudentInput, Prisma.RecordingUncheckedCreateWithoutStudentInput> | Prisma.RecordingCreateWithoutStudentInput[] | Prisma.RecordingUncheckedCreateWithoutStudentInput[]
   connectOrCreate?: Prisma.RecordingCreateOrConnectWithoutStudentInput | Prisma.RecordingCreateOrConnectWithoutStudentInput[]
   createMany?: Prisma.RecordingCreateManyStudentInputEnvelope
+  connect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+}
+
+export type RecordingUncheckedCreateNestedManyWithoutQariInput = {
+  create?: Prisma.XOR<Prisma.RecordingCreateWithoutQariInput, Prisma.RecordingUncheckedCreateWithoutQariInput> | Prisma.RecordingCreateWithoutQariInput[] | Prisma.RecordingUncheckedCreateWithoutQariInput[]
+  connectOrCreate?: Prisma.RecordingCreateOrConnectWithoutQariInput | Prisma.RecordingCreateOrConnectWithoutQariInput[]
+  createMany?: Prisma.RecordingCreateManyQariInputEnvelope
   connect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
 }
 
@@ -949,6 +1071,20 @@ export type RecordingUpdateManyWithoutStudentNestedInput = {
   deleteMany?: Prisma.RecordingScalarWhereInput | Prisma.RecordingScalarWhereInput[]
 }
 
+export type RecordingUpdateManyWithoutQariNestedInput = {
+  create?: Prisma.XOR<Prisma.RecordingCreateWithoutQariInput, Prisma.RecordingUncheckedCreateWithoutQariInput> | Prisma.RecordingCreateWithoutQariInput[] | Prisma.RecordingUncheckedCreateWithoutQariInput[]
+  connectOrCreate?: Prisma.RecordingCreateOrConnectWithoutQariInput | Prisma.RecordingCreateOrConnectWithoutQariInput[]
+  upsert?: Prisma.RecordingUpsertWithWhereUniqueWithoutQariInput | Prisma.RecordingUpsertWithWhereUniqueWithoutQariInput[]
+  createMany?: Prisma.RecordingCreateManyQariInputEnvelope
+  set?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  disconnect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  delete?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  connect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  update?: Prisma.RecordingUpdateWithWhereUniqueWithoutQariInput | Prisma.RecordingUpdateWithWhereUniqueWithoutQariInput[]
+  updateMany?: Prisma.RecordingUpdateManyWithWhereWithoutQariInput | Prisma.RecordingUpdateManyWithWhereWithoutQariInput[]
+  deleteMany?: Prisma.RecordingScalarWhereInput | Prisma.RecordingScalarWhereInput[]
+}
+
 export type RecordingUncheckedUpdateManyWithoutStudentNestedInput = {
   create?: Prisma.XOR<Prisma.RecordingCreateWithoutStudentInput, Prisma.RecordingUncheckedCreateWithoutStudentInput> | Prisma.RecordingCreateWithoutStudentInput[] | Prisma.RecordingUncheckedCreateWithoutStudentInput[]
   connectOrCreate?: Prisma.RecordingCreateOrConnectWithoutStudentInput | Prisma.RecordingCreateOrConnectWithoutStudentInput[]
@@ -963,8 +1099,30 @@ export type RecordingUncheckedUpdateManyWithoutStudentNestedInput = {
   deleteMany?: Prisma.RecordingScalarWhereInput | Prisma.RecordingScalarWhereInput[]
 }
 
+export type RecordingUncheckedUpdateManyWithoutQariNestedInput = {
+  create?: Prisma.XOR<Prisma.RecordingCreateWithoutQariInput, Prisma.RecordingUncheckedCreateWithoutQariInput> | Prisma.RecordingCreateWithoutQariInput[] | Prisma.RecordingUncheckedCreateWithoutQariInput[]
+  connectOrCreate?: Prisma.RecordingCreateOrConnectWithoutQariInput | Prisma.RecordingCreateOrConnectWithoutQariInput[]
+  upsert?: Prisma.RecordingUpsertWithWhereUniqueWithoutQariInput | Prisma.RecordingUpsertWithWhereUniqueWithoutQariInput[]
+  createMany?: Prisma.RecordingCreateManyQariInputEnvelope
+  set?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  disconnect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  delete?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  connect?: Prisma.RecordingWhereUniqueInput | Prisma.RecordingWhereUniqueInput[]
+  update?: Prisma.RecordingUpdateWithWhereUniqueWithoutQariInput | Prisma.RecordingUpdateWithWhereUniqueWithoutQariInput[]
+  updateMany?: Prisma.RecordingUpdateManyWithWhereWithoutQariInput | Prisma.RecordingUpdateManyWithWhereWithoutQariInput[]
+  deleteMany?: Prisma.RecordingScalarWhereInput | Prisma.RecordingScalarWhereInput[]
+}
+
 export type IntFieldUpdateOperationsInput = {
   set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
@@ -1015,6 +1173,9 @@ export type RecordingCreateWithoutStudentInput = {
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1037,16 +1198,21 @@ export type RecordingCreateWithoutStudentInput = {
   detectedIssues?: string | null
   analysisProvider?: string | null
   analysisVersion?: string | null
+  qari?: Prisma.UserCreateNestedOneWithoutQariSessionsInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutRecordingInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecordingInput
 }
 
 export type RecordingUncheckedCreateWithoutStudentInput = {
   id?: string
+  qariId?: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1083,6 +1249,88 @@ export type RecordingCreateManyStudentInputEnvelope = {
   skipDuplicates?: boolean
 }
 
+export type RecordingCreateWithoutQariInput = {
+  id?: string
+  surahNumber: number
+  surahName: string
+  ayahFrom: number
+  ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
+  durationMs: number
+  notes?: string | null
+  filePath: string
+  fileName: string
+  mimeType: string
+  fileSizeBytes: number
+  checksum?: string | null
+  uploadStatus?: string
+  reviewStatus?: string
+  recordedAt?: Date | string
+  uploadedAt?: Date | string | null
+  timezone?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  analysisStatus?: string | null
+  transcription?: string | null
+  detectedAyahs?: string | null
+  confidence?: number | null
+  detectedIssues?: string | null
+  analysisProvider?: string | null
+  analysisVersion?: string | null
+  student: Prisma.UserCreateNestedOneWithoutRecordingsInput
+  mistakes?: Prisma.MistakeCreateNestedManyWithoutRecordingInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutRecordingInput
+}
+
+export type RecordingUncheckedCreateWithoutQariInput = {
+  id?: string
+  studentId: string
+  surahNumber: number
+  surahName: string
+  ayahFrom: number
+  ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
+  durationMs: number
+  notes?: string | null
+  filePath: string
+  fileName: string
+  mimeType: string
+  fileSizeBytes: number
+  checksum?: string | null
+  uploadStatus?: string
+  reviewStatus?: string
+  recordedAt?: Date | string
+  uploadedAt?: Date | string | null
+  timezone?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  analysisStatus?: string | null
+  transcription?: string | null
+  detectedAyahs?: string | null
+  confidence?: number | null
+  detectedIssues?: string | null
+  analysisProvider?: string | null
+  analysisVersion?: string | null
+  mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutRecordingInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecordingInput
+}
+
+export type RecordingCreateOrConnectWithoutQariInput = {
+  where: Prisma.RecordingWhereUniqueInput
+  create: Prisma.XOR<Prisma.RecordingCreateWithoutQariInput, Prisma.RecordingUncheckedCreateWithoutQariInput>
+}
+
+export type RecordingCreateManyQariInputEnvelope = {
+  data: Prisma.RecordingCreateManyQariInput | Prisma.RecordingCreateManyQariInput[]
+  skipDuplicates?: boolean
+}
+
 export type RecordingUpsertWithWhereUniqueWithoutStudentInput = {
   where: Prisma.RecordingWhereUniqueInput
   update: Prisma.XOR<Prisma.RecordingUpdateWithoutStudentInput, Prisma.RecordingUncheckedUpdateWithoutStudentInput>
@@ -1105,10 +1353,14 @@ export type RecordingScalarWhereInput = {
   NOT?: Prisma.RecordingScalarWhereInput | Prisma.RecordingScalarWhereInput[]
   id?: Prisma.StringFilter<"Recording"> | string
   studentId?: Prisma.StringFilter<"Recording"> | string
+  qariId?: Prisma.StringNullableFilter<"Recording"> | string | null
   surahNumber?: Prisma.IntFilter<"Recording"> | number
   surahName?: Prisma.StringFilter<"Recording"> | string
   ayahFrom?: Prisma.IntFilter<"Recording"> | number
   ayahTo?: Prisma.IntFilter<"Recording"> | number
+  paraNumber?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraFrom?: Prisma.IntNullableFilter<"Recording"> | number | null
+  paraTo?: Prisma.IntNullableFilter<"Recording"> | number | null
   durationMs?: Prisma.IntFilter<"Recording"> | number
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
   filePath?: Prisma.StringFilter<"Recording"> | string
@@ -1133,12 +1385,31 @@ export type RecordingScalarWhereInput = {
   analysisVersion?: Prisma.StringNullableFilter<"Recording"> | string | null
 }
 
+export type RecordingUpsertWithWhereUniqueWithoutQariInput = {
+  where: Prisma.RecordingWhereUniqueInput
+  update: Prisma.XOR<Prisma.RecordingUpdateWithoutQariInput, Prisma.RecordingUncheckedUpdateWithoutQariInput>
+  create: Prisma.XOR<Prisma.RecordingCreateWithoutQariInput, Prisma.RecordingUncheckedCreateWithoutQariInput>
+}
+
+export type RecordingUpdateWithWhereUniqueWithoutQariInput = {
+  where: Prisma.RecordingWhereUniqueInput
+  data: Prisma.XOR<Prisma.RecordingUpdateWithoutQariInput, Prisma.RecordingUncheckedUpdateWithoutQariInput>
+}
+
+export type RecordingUpdateManyWithWhereWithoutQariInput = {
+  where: Prisma.RecordingScalarWhereInput
+  data: Prisma.XOR<Prisma.RecordingUpdateManyMutationInput, Prisma.RecordingUncheckedUpdateManyWithoutQariInput>
+}
+
 export type RecordingCreateWithoutMistakesInput = {
   id?: string
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1162,16 +1433,21 @@ export type RecordingCreateWithoutMistakesInput = {
   analysisProvider?: string | null
   analysisVersion?: string | null
   student: Prisma.UserCreateNestedOneWithoutRecordingsInput
+  qari?: Prisma.UserCreateNestedOneWithoutQariSessionsInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecordingInput
 }
 
 export type RecordingUncheckedCreateWithoutMistakesInput = {
   id?: string
   studentId: string
+  qariId?: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1219,6 +1495,9 @@ export type RecordingUpdateWithoutMistakesInput = {
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1242,16 +1521,21 @@ export type RecordingUpdateWithoutMistakesInput = {
   analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutRecordingsNestedInput
+  qari?: Prisma.UserUpdateOneWithoutQariSessionsNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecordingNestedInput
 }
 
 export type RecordingUncheckedUpdateWithoutMistakesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  qariId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1283,6 +1567,9 @@ export type RecordingCreateWithoutNotificationsInput = {
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1306,16 +1593,21 @@ export type RecordingCreateWithoutNotificationsInput = {
   analysisProvider?: string | null
   analysisVersion?: string | null
   student: Prisma.UserCreateNestedOneWithoutRecordingsInput
+  qari?: Prisma.UserCreateNestedOneWithoutQariSessionsInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutRecordingInput
 }
 
 export type RecordingUncheckedCreateWithoutNotificationsInput = {
   id?: string
   studentId: string
+  qariId?: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1363,6 +1655,9 @@ export type RecordingUpdateWithoutNotificationsInput = {
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1386,16 +1681,21 @@ export type RecordingUpdateWithoutNotificationsInput = {
   analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   student?: Prisma.UserUpdateOneRequiredWithoutRecordingsNestedInput
+  qari?: Prisma.UserUpdateOneWithoutQariSessionsNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutRecordingNestedInput
 }
 
 export type RecordingUncheckedUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  qariId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1423,10 +1723,48 @@ export type RecordingUncheckedUpdateWithoutNotificationsInput = {
 
 export type RecordingCreateManyStudentInput = {
   id?: string
+  qariId?: string | null
   surahNumber: number
   surahName: string
   ayahFrom: number
   ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
+  durationMs: number
+  notes?: string | null
+  filePath: string
+  fileName: string
+  mimeType: string
+  fileSizeBytes: number
+  checksum?: string | null
+  uploadStatus?: string
+  reviewStatus?: string
+  recordedAt?: Date | string
+  uploadedAt?: Date | string | null
+  timezone?: string
+  deletedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  analysisStatus?: string | null
+  transcription?: string | null
+  detectedAyahs?: string | null
+  confidence?: number | null
+  detectedIssues?: string | null
+  analysisProvider?: string | null
+  analysisVersion?: string | null
+}
+
+export type RecordingCreateManyQariInput = {
+  id?: string
+  studentId: string
+  surahNumber: number
+  surahName: string
+  ayahFrom: number
+  ayahTo: number
+  paraNumber?: number | null
+  paraFrom?: number | null
+  paraTo?: number | null
   durationMs: number
   notes?: string | null
   filePath: string
@@ -1457,6 +1795,9 @@ export type RecordingUpdateWithoutStudentInput = {
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1479,16 +1820,21 @@ export type RecordingUpdateWithoutStudentInput = {
   detectedIssues?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qari?: Prisma.UserUpdateOneWithoutQariSessionsNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutRecordingNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecordingNestedInput
 }
 
 export type RecordingUncheckedUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  qariId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1517,10 +1863,120 @@ export type RecordingUncheckedUpdateWithoutStudentInput = {
 
 export type RecordingUncheckedUpdateManyWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  qariId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
   surahName?: Prisma.StringFieldUpdateOperationsInput | string
   ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
   ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  durationMs?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  recordedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  analysisStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  detectedAyahs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  detectedIssues?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type RecordingUpdateWithoutQariInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  surahName?: Prisma.StringFieldUpdateOperationsInput | string
+  ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
+  ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  durationMs?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  recordedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  analysisStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  detectedAyahs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  detectedIssues?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  student?: Prisma.UserUpdateOneRequiredWithoutRecordingsNestedInput
+  mistakes?: Prisma.MistakeUpdateManyWithoutRecordingNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutRecordingNestedInput
+}
+
+export type RecordingUncheckedUpdateWithoutQariInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  surahName?: Prisma.StringFieldUpdateOperationsInput | string
+  ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
+  ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  durationMs?: Prisma.IntFieldUpdateOperationsInput | number
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  filePath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSizeBytes?: Prisma.IntFieldUpdateOperationsInput | number
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  recordedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  analysisStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  detectedAyahs?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  detectedIssues?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  analysisProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  analysisVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutRecordingNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecordingNestedInput
+}
+
+export type RecordingUncheckedUpdateManyWithoutQariInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  surahNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  surahName?: Prisma.StringFieldUpdateOperationsInput | string
+  ayahFrom?: Prisma.IntFieldUpdateOperationsInput | number
+  ayahTo?: Prisma.IntFieldUpdateOperationsInput | number
+  paraNumber?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraFrom?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  paraTo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMs?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1588,10 +2044,14 @@ export type RecordingCountOutputTypeCountNotificationsArgs<ExtArgs extends runti
 export type RecordingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
+  qariId?: boolean
   surahNumber?: boolean
   surahName?: boolean
   ayahFrom?: boolean
   ayahTo?: boolean
+  paraNumber?: boolean
+  paraFrom?: boolean
+  paraTo?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -1615,6 +2075,7 @@ export type RecordingSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   analysisProvider?: boolean
   analysisVersion?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
   mistakes?: boolean | Prisma.Recording$mistakesArgs<ExtArgs>
   notifications?: boolean | Prisma.Recording$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.RecordingCountOutputTypeDefaultArgs<ExtArgs>
@@ -1623,10 +2084,14 @@ export type RecordingSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type RecordingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
+  qariId?: boolean
   surahNumber?: boolean
   surahName?: boolean
   ayahFrom?: boolean
   ayahTo?: boolean
+  paraNumber?: boolean
+  paraFrom?: boolean
+  paraTo?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -1650,15 +2115,20 @@ export type RecordingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   analysisProvider?: boolean
   analysisVersion?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
 }, ExtArgs["result"]["recording"]>
 
 export type RecordingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
+  qariId?: boolean
   surahNumber?: boolean
   surahName?: boolean
   ayahFrom?: boolean
   ayahTo?: boolean
+  paraNumber?: boolean
+  paraFrom?: boolean
+  paraTo?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -1682,15 +2152,20 @@ export type RecordingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   analysisProvider?: boolean
   analysisVersion?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
 }, ExtArgs["result"]["recording"]>
 
 export type RecordingSelectScalar = {
   id?: boolean
   studentId?: boolean
+  qariId?: boolean
   surahNumber?: boolean
   surahName?: boolean
   ayahFrom?: boolean
   ayahTo?: boolean
+  paraNumber?: boolean
+  paraFrom?: boolean
+  paraTo?: boolean
   durationMs?: boolean
   notes?: boolean
   filePath?: boolean
@@ -1715,34 +2190,42 @@ export type RecordingSelectScalar = {
   analysisVersion?: boolean
 }
 
-export type RecordingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "surahNumber" | "surahName" | "ayahFrom" | "ayahTo" | "durationMs" | "notes" | "filePath" | "fileName" | "mimeType" | "fileSizeBytes" | "checksum" | "uploadStatus" | "reviewStatus" | "recordedAt" | "uploadedAt" | "timezone" | "deletedAt" | "createdAt" | "updatedAt" | "analysisStatus" | "transcription" | "detectedAyahs" | "confidence" | "detectedIssues" | "analysisProvider" | "analysisVersion", ExtArgs["result"]["recording"]>
+export type RecordingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "qariId" | "surahNumber" | "surahName" | "ayahFrom" | "ayahTo" | "paraNumber" | "paraFrom" | "paraTo" | "durationMs" | "notes" | "filePath" | "fileName" | "mimeType" | "fileSizeBytes" | "checksum" | "uploadStatus" | "reviewStatus" | "recordedAt" | "uploadedAt" | "timezone" | "deletedAt" | "createdAt" | "updatedAt" | "analysisStatus" | "transcription" | "detectedAyahs" | "confidence" | "detectedIssues" | "analysisProvider" | "analysisVersion", ExtArgs["result"]["recording"]>
 export type RecordingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
   mistakes?: boolean | Prisma.Recording$mistakesArgs<ExtArgs>
   notifications?: boolean | Prisma.Recording$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.RecordingCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RecordingIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
 }
 export type RecordingIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  qari?: boolean | Prisma.Recording$qariArgs<ExtArgs>
 }
 
 export type $RecordingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Recording"
   objects: {
     student: Prisma.$UserPayload<ExtArgs>
+    qari: Prisma.$UserPayload<ExtArgs> | null
     mistakes: Prisma.$MistakePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     studentId: string
+    qariId: string | null
     surahNumber: number
     surahName: string
     ayahFrom: number
     ayahTo: number
+    paraNumber: number | null
+    paraFrom: number | null
+    paraTo: number | null
     durationMs: number
     notes: string | null
     filePath: string
@@ -2160,6 +2643,7 @@ readonly fields: RecordingFieldRefs;
 export interface Prisma__RecordingClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   student<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  qari<T extends Prisma.Recording$qariArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Recording$qariArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   mistakes<T extends Prisma.Recording$mistakesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Recording$mistakesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MistakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.Recording$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Recording$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2193,10 +2677,14 @@ export interface Prisma__RecordingClient<T, Null = never, ExtArgs extends runtim
 export interface RecordingFieldRefs {
   readonly id: Prisma.FieldRef<"Recording", 'String'>
   readonly studentId: Prisma.FieldRef<"Recording", 'String'>
+  readonly qariId: Prisma.FieldRef<"Recording", 'String'>
   readonly surahNumber: Prisma.FieldRef<"Recording", 'Int'>
   readonly surahName: Prisma.FieldRef<"Recording", 'String'>
   readonly ayahFrom: Prisma.FieldRef<"Recording", 'Int'>
   readonly ayahTo: Prisma.FieldRef<"Recording", 'Int'>
+  readonly paraNumber: Prisma.FieldRef<"Recording", 'Int'>
+  readonly paraFrom: Prisma.FieldRef<"Recording", 'Int'>
+  readonly paraTo: Prisma.FieldRef<"Recording", 'Int'>
   readonly durationMs: Prisma.FieldRef<"Recording", 'Int'>
   readonly notes: Prisma.FieldRef<"Recording", 'String'>
   readonly filePath: Prisma.FieldRef<"Recording", 'String'>
@@ -2617,6 +3105,25 @@ export type RecordingDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Recordings to delete.
    */
   limit?: number
+}
+
+/**
+ * Recording.qari
+ */
+export type Recording$qariArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

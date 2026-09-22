@@ -30,6 +30,10 @@ export interface CreatedRecording {
   surahName: string;
   ayahFrom: number;
   ayahTo: number;
+  paraNumber: number | null;
+  paraFrom: number | null;
+  paraTo: number | null;
+  qariId: string | null;
   durationMs: number;
   recordedAt: Date;
   uploadStatus: string;
@@ -106,10 +110,14 @@ export async function createRecording(
     const created = await db.recording.create({
       data: {
         studentId: opts.studentId,
+        qariId: opts.qariId ?? null,
         surahNumber: opts.surahNumber,
         surahName: surah.name,
         ayahFrom: opts.ayahFrom,
         ayahTo: opts.ayahTo,
+        paraNumber: opts.paraNumber ?? null,
+        paraFrom: opts.paraFrom ?? null,
+        paraTo: opts.paraTo ?? null,
         durationMs: opts.durationMs,
         notes: opts.notes || null,
         filePath: upload.secure_url,
@@ -131,6 +139,10 @@ export async function createRecording(
       surahName: created.surahName,
       ayahFrom: created.ayahFrom,
       ayahTo: created.ayahTo,
+      paraNumber: created.paraNumber,
+      paraFrom: created.paraFrom,
+      paraTo: created.paraTo,
+      qariId: created.qariId,
       durationMs: created.durationMs,
       recordedAt: created.recordedAt,
       uploadStatus: created.uploadStatus,
@@ -154,6 +166,10 @@ export async function listRecordingsForStudent(studentId: string) {
       surahName: true,
       ayahFrom: true,
       ayahTo: true,
+      paraNumber: true,
+      paraFrom: true,
+      paraTo: true,
+      qariId: true,
       durationMs: true,
       notes: true,
       mimeType: true,

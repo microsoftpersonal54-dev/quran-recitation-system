@@ -208,10 +208,13 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   recordings?: Prisma.RecordingListRelationFilter
+  qariSessions?: Prisma.RecordingListRelationFilter
   mistakes?: Prisma.MistakeListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  attendance?: Prisma.AttendanceListRelationFilter
+  markedLeaves?: Prisma.AttendanceListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -225,10 +228,13 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   recordings?: Prisma.RecordingOrderByRelationAggregateInput
+  qariSessions?: Prisma.RecordingOrderByRelationAggregateInput
   mistakes?: Prisma.MistakeOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   pushSubscriptions?: Prisma.PushSubscriptionOrderByRelationAggregateInput
+  attendance?: Prisma.AttendanceOrderByRelationAggregateInput
+  markedLeaves?: Prisma.AttendanceOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -245,10 +251,13 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   recordings?: Prisma.RecordingListRelationFilter
+  qariSessions?: Prisma.RecordingListRelationFilter
   mistakes?: Prisma.MistakeListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   pushSubscriptions?: Prisma.PushSubscriptionListRelationFilter
+  attendance?: Prisma.AttendanceListRelationFilter
+  markedLeaves?: Prisma.AttendanceListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -290,10 +299,13 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -307,10 +319,13 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUpdateInput = {
@@ -324,10 +339,13 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -341,10 +359,13 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -455,12 +476,28 @@ export type UserCreateNestedOneWithoutRecordingsInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
+export type UserCreateNestedOneWithoutQariSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQariSessionsInput, Prisma.UserUncheckedCreateWithoutQariSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQariSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
 export type UserUpdateOneRequiredWithoutRecordingsNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRecordingsInput, Prisma.UserUncheckedCreateWithoutRecordingsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRecordingsInput
   upsert?: Prisma.UserUpsertWithoutRecordingsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRecordingsInput, Prisma.UserUpdateWithoutRecordingsInput>, Prisma.UserUncheckedUpdateWithoutRecordingsInput>
+}
+
+export type UserUpdateOneWithoutQariSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutQariSessionsInput, Prisma.UserUncheckedCreateWithoutQariSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutQariSessionsInput
+  upsert?: Prisma.UserUpsertWithoutQariSessionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutQariSessionsInput, Prisma.UserUpdateWithoutQariSessionsInput>, Prisma.UserUncheckedUpdateWithoutQariSessionsInput>
 }
 
 export type UserCreateNestedOneWithoutMistakesInput = {
@@ -521,6 +558,36 @@ export type UserUpdateOneRequiredWithoutPushSubscriptionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPushSubscriptionsInput, Prisma.UserUpdateWithoutPushSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutPushSubscriptionsInput>
 }
 
+export type UserCreateNestedOneWithoutAttendanceInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAttendanceInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutMarkedLeavesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMarkedLeavesInput, Prisma.UserUncheckedCreateWithoutMarkedLeavesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMarkedLeavesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAttendanceNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAttendanceInput
+  upsert?: Prisma.UserUpsertWithoutAttendanceInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAttendanceInput, Prisma.UserUpdateWithoutAttendanceInput>, Prisma.UserUncheckedUpdateWithoutAttendanceInput>
+}
+
+export type UserUpdateOneWithoutMarkedLeavesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMarkedLeavesInput, Prisma.UserUncheckedCreateWithoutMarkedLeavesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMarkedLeavesInput
+  upsert?: Prisma.UserUpsertWithoutMarkedLeavesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMarkedLeavesInput, Prisma.UserUpdateWithoutMarkedLeavesInput>, Prisma.UserUncheckedUpdateWithoutMarkedLeavesInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -531,10 +598,13 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -547,10 +617,13 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -579,10 +652,13 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -595,10 +671,13 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserCreateWithoutRecordingsInput = {
@@ -611,10 +690,13 @@ export type UserCreateWithoutRecordingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateWithoutRecordingsInput = {
@@ -627,15 +709,61 @@ export type UserUncheckedCreateWithoutRecordingsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserCreateOrConnectWithoutRecordingsInput = {
   where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutRecordingsInput, Prisma.UserUncheckedCreateWithoutRecordingsInput>
+}
+
+export type UserCreateWithoutQariSessionsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
+}
+
+export type UserUncheckedCreateWithoutQariSessionsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
+}
+
+export type UserCreateOrConnectWithoutQariSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutQariSessionsInput, Prisma.UserUncheckedCreateWithoutQariSessionsInput>
 }
 
 export type UserUpsertWithoutRecordingsInput = {
@@ -659,10 +787,13 @@ export type UserUpdateWithoutRecordingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecordingsInput = {
@@ -675,10 +806,62 @@ export type UserUncheckedUpdateWithoutRecordingsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
+}
+
+export type UserUpsertWithoutQariSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutQariSessionsInput, Prisma.UserUncheckedUpdateWithoutQariSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutQariSessionsInput, Prisma.UserUncheckedCreateWithoutQariSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutQariSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutQariSessionsInput, Prisma.UserUncheckedUpdateWithoutQariSessionsInput>
+}
+
+export type UserUpdateWithoutQariSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutQariSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserCreateWithoutMistakesInput = {
@@ -692,9 +875,12 @@ export type UserCreateWithoutMistakesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateWithoutMistakesInput = {
@@ -708,9 +894,12 @@ export type UserUncheckedCreateWithoutMistakesInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserCreateOrConnectWithoutMistakesInput = {
@@ -740,9 +929,12 @@ export type UserUpdateWithoutMistakesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMistakesInput = {
@@ -756,9 +948,12 @@ export type UserUncheckedUpdateWithoutMistakesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -772,9 +967,12 @@ export type UserCreateWithoutNotificationsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -788,9 +986,12 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -820,9 +1021,12 @@ export type UserUpdateWithoutNotificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -836,9 +1040,12 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserCreateWithoutAuditLogsInput = {
@@ -852,9 +1059,12 @@ export type UserCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -868,9 +1078,12 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -900,9 +1113,12 @@ export type UserUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -916,9 +1132,12 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserCreateWithoutPushSubscriptionsInput = {
@@ -932,9 +1151,12 @@ export type UserCreateWithoutPushSubscriptionsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
@@ -948,9 +1170,12 @@ export type UserUncheckedCreateWithoutPushSubscriptionsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
   mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
 }
 
 export type UserCreateOrConnectWithoutPushSubscriptionsInput = {
@@ -980,9 +1205,12 @@ export type UserUpdateWithoutPushSubscriptionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
@@ -996,9 +1224,196 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
   mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
+}
+
+export type UserCreateWithoutAttendanceInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
+  mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  markedLeaves?: Prisma.AttendanceCreateNestedManyWithoutMarkedByInput
+}
+
+export type UserUncheckedCreateWithoutAttendanceInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
+  mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  markedLeaves?: Prisma.AttendanceUncheckedCreateNestedManyWithoutMarkedByInput
+}
+
+export type UserCreateOrConnectWithoutAttendanceInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+}
+
+export type UserCreateWithoutMarkedLeavesInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingCreateNestedManyWithoutQariInput
+  mistakes?: Prisma.MistakeCreateNestedManyWithoutReviewerInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutMarkedLeavesInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  role: string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  recordings?: Prisma.RecordingUncheckedCreateNestedManyWithoutStudentInput
+  qariSessions?: Prisma.RecordingUncheckedCreateNestedManyWithoutQariInput
+  mistakes?: Prisma.MistakeUncheckedCreateNestedManyWithoutReviewerInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedCreateNestedManyWithoutUserInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutMarkedLeavesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMarkedLeavesInput, Prisma.UserUncheckedCreateWithoutMarkedLeavesInput>
+}
+
+export type UserUpsertWithoutAttendanceInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAttendanceInput, Prisma.UserUncheckedUpdateWithoutAttendanceInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAttendanceInput, Prisma.UserUncheckedCreateWithoutAttendanceInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAttendanceInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAttendanceInput, Prisma.UserUncheckedUpdateWithoutAttendanceInput>
+}
+
+export type UserUpdateWithoutAttendanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
+  mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  markedLeaves?: Prisma.AttendanceUpdateManyWithoutMarkedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAttendanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
+  mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  markedLeaves?: Prisma.AttendanceUncheckedUpdateManyWithoutMarkedByNestedInput
+}
+
+export type UserUpsertWithoutMarkedLeavesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMarkedLeavesInput, Prisma.UserUncheckedUpdateWithoutMarkedLeavesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMarkedLeavesInput, Prisma.UserUncheckedCreateWithoutMarkedLeavesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMarkedLeavesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMarkedLeavesInput, Prisma.UserUncheckedUpdateWithoutMarkedLeavesInput>
+}
+
+export type UserUpdateWithoutMarkedLeavesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUpdateManyWithoutQariNestedInput
+  mistakes?: Prisma.MistakeUpdateManyWithoutReviewerNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMarkedLeavesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  recordings?: Prisma.RecordingUncheckedUpdateManyWithoutStudentNestedInput
+  qariSessions?: Prisma.RecordingUncheckedUpdateManyWithoutQariNestedInput
+  mistakes?: Prisma.MistakeUncheckedUpdateManyWithoutReviewerNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  pushSubscriptions?: Prisma.PushSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 
@@ -1009,19 +1424,25 @@ export type UserUncheckedUpdateWithoutPushSubscriptionsInput = {
 export type UserCountOutputType = {
   sessions: number
   recordings: number
+  qariSessions: number
   mistakes: number
   notifications: number
   auditLogs: number
   pushSubscriptions: number
+  attendance: number
+  markedLeaves: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   recordings?: boolean | UserCountOutputTypeCountRecordingsArgs
+  qariSessions?: boolean | UserCountOutputTypeCountQariSessionsArgs
   mistakes?: boolean | UserCountOutputTypeCountMistakesArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
   pushSubscriptions?: boolean | UserCountOutputTypeCountPushSubscriptionsArgs
+  attendance?: boolean | UserCountOutputTypeCountAttendanceArgs
+  markedLeaves?: boolean | UserCountOutputTypeCountMarkedLeavesArgs
 }
 
 /**
@@ -1045,6 +1466,13 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
  * UserCountOutputType without action
  */
 export type UserCountOutputTypeCountRecordingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RecordingWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountQariSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.RecordingWhereInput
 }
 
@@ -1076,6 +1504,20 @@ export type UserCountOutputTypeCountPushSubscriptionsArgs<ExtArgs extends runtim
   where?: Prisma.PushSubscriptionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAttendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttendanceWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMarkedLeavesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttendanceWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1088,10 +1530,13 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   recordings?: boolean | Prisma.User$recordingsArgs<ExtArgs>
+  qariSessions?: boolean | Prisma.User$qariSessionsArgs<ExtArgs>
   mistakes?: boolean | Prisma.User$mistakesArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  attendance?: boolean | Prisma.User$attendanceArgs<ExtArgs>
+  markedLeaves?: boolean | Prisma.User$markedLeavesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1132,10 +1577,13 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   recordings?: boolean | Prisma.User$recordingsArgs<ExtArgs>
+  qariSessions?: boolean | Prisma.User$qariSessionsArgs<ExtArgs>
   mistakes?: boolean | Prisma.User$mistakesArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
   pushSubscriptions?: boolean | Prisma.User$pushSubscriptionsArgs<ExtArgs>
+  attendance?: boolean | Prisma.User$attendanceArgs<ExtArgs>
+  markedLeaves?: boolean | Prisma.User$markedLeavesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1146,10 +1594,13 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     recordings: Prisma.$RecordingPayload<ExtArgs>[]
+    qariSessions: Prisma.$RecordingPayload<ExtArgs>[]
     mistakes: Prisma.$MistakePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     pushSubscriptions: Prisma.$PushSubscriptionPayload<ExtArgs>[]
+    attendance: Prisma.$AttendancePayload<ExtArgs>[]
+    markedLeaves: Prisma.$AttendancePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1556,10 +2007,13 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recordings<T extends Prisma.User$recordingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recordingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  qariSessions<T extends Prisma.User$qariSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$qariSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mistakes<T extends Prisma.User$mistakesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mistakesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MistakePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pushSubscriptions<T extends Prisma.User$pushSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  attendance<T extends Prisma.User$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  markedLeaves<T extends Prisma.User$markedLeavesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$markedLeavesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2038,6 +2492,30 @@ export type User$recordingsArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * User.qariSessions
+ */
+export type User$qariSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Recording
+   */
+  select?: Prisma.RecordingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Recording
+   */
+  omit?: Prisma.RecordingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecordingInclude<ExtArgs> | null
+  where?: Prisma.RecordingWhereInput
+  orderBy?: Prisma.RecordingOrderByWithRelationInput | Prisma.RecordingOrderByWithRelationInput[]
+  cursor?: Prisma.RecordingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RecordingScalarFieldEnum | Prisma.RecordingScalarFieldEnum[]
+}
+
+/**
  * User.mistakes
  */
 export type User$mistakesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2131,6 +2609,54 @@ export type User$pushSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.PushSubscriptionScalarFieldEnum | Prisma.PushSubscriptionScalarFieldEnum[]
+}
+
+/**
+ * User.attendance
+ */
+export type User$attendanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attendance
+   */
+  select?: Prisma.AttendanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attendance
+   */
+  omit?: Prisma.AttendanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttendanceInclude<ExtArgs> | null
+  where?: Prisma.AttendanceWhereInput
+  orderBy?: Prisma.AttendanceOrderByWithRelationInput | Prisma.AttendanceOrderByWithRelationInput[]
+  cursor?: Prisma.AttendanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttendanceScalarFieldEnum | Prisma.AttendanceScalarFieldEnum[]
+}
+
+/**
+ * User.markedLeaves
+ */
+export type User$markedLeavesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attendance
+   */
+  select?: Prisma.AttendanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attendance
+   */
+  omit?: Prisma.AttendanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttendanceInclude<ExtArgs> | null
+  where?: Prisma.AttendanceWhereInput
+  orderBy?: Prisma.AttendanceOrderByWithRelationInput | Prisma.AttendanceOrderByWithRelationInput[]
+  cursor?: Prisma.AttendanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttendanceScalarFieldEnum | Prisma.AttendanceScalarFieldEnum[]
 }
 
 /**

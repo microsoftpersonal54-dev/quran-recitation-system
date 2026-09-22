@@ -57,3 +57,8 @@ export type AppSetting = Prisma.AppSettingModel
  * 
  */
 export type PushSubscription = Prisma.PushSubscriptionModel
+/**
+ * Model Attendance
+ * 
+ */
+export type Attendance = Prisma.AttendanceModel

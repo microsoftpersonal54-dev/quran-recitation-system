@@ -585,14 +585,6 @@ export type MistakeUncheckedUpdateManyWithoutRecordingNestedInput = {
   deleteMany?: Prisma.MistakeScalarWhereInput | Prisma.MistakeScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type MistakeCreateWithoutReviewerInput = {
   id?: string
   timestampMs: number

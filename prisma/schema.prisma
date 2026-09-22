@@ -21,10 +21,13 @@ model User {
 
   sessions          Session[]
   recordings        Recording[]         @relation("student_recordings")
+  qariSessions      Recording[]         @relation("qari_sessions")
   mistakes          Mistake[]           @relation("reviewer_mistakes")
   notifications     Notification[]
   auditLogs         AuditLog[]
   pushSubscriptions PushSubscription[]
+  attendance        Attendance[]        @relation("student_attendance")
+  markedLeaves      Attendance[]        @relation("marked_attendance")
 
   @@index([role])
 }
@@ -50,10 +53,14 @@ model Session {
 model Recording {
   id            String    @id @default(cuid())
   studentId     String
+  qariId        String?
   surahNumber   Int
   surahName     String
   ayahFrom      Int
   ayahTo        Int
+  paraNumber    Int?
+  paraFrom      Int?
+  paraTo        Int?
   durationMs    Int
   notes         String?
   filePath      String
@@ -80,10 +87,12 @@ model Recording {
   analysisVersion  String?
 
   student       User           @relation("student_recordings", fields: [studentId], references: [id])
+  qari          User?          @relation("qari_sessions", fields: [qariId], references: [id])
   mistakes      Mistake[]
   notifications Notification[]
 
   @@index([studentId])
+  @@index([qariId])
   @@index([recordedAt])
   @@index([surahNumber])
   @@index([reviewStatus])
@@ -163,4 +172,25 @@ model PushSubscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// ============ ATTENDANCE & LEAVE ============
+
+model Attendance {
+  id         String   @id @default(cuid())
+  studentId  String
+  date       DateTime // normalized to midnight UTC
+  status     String   // PRESENT | LEAVE | ABSENT
+  reason     String?  // free-text reason (for LEAVE)
+  notes      String?
+  markedById String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  student  User  @relation("student_attendance", fields: [studentId], references: [id], onDelete: Cascade)
+  markedBy User? @relation("marked_attendance", fields: [markedById], references: [id])
+
+  @@unique([studentId, date])
+  @@index([date])
+  @@index([studentId])
 }

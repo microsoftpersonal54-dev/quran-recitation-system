@@ -58,7 +58,8 @@ export const ModelName = {
   Notification: 'Notification',
   AuditLog: 'AuditLog',
   AppSetting: 'AppSetting',
-  PushSubscription: 'PushSubscription'
+  PushSubscription: 'PushSubscription',
+  Attendance: 'Attendance'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -108,10 +109,14 @@ export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeo
 export const RecordingScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
+  qariId: 'qariId',
   surahNumber: 'surahNumber',
   surahName: 'surahName',
   ayahFrom: 'ayahFrom',
   ayahTo: 'ayahTo',
+  paraNumber: 'paraNumber',
+  paraFrom: 'paraFrom',
+  paraTo: 'paraTo',
   durationMs: 'durationMs',
   notes: 'notes',
   filePath: 'filePath',
@@ -202,6 +207,21 @@ export const PushSubscriptionScalarFieldEnum = {
 } as const
 
 export type PushSubscriptionScalarFieldEnum = (typeof PushSubscriptionScalarFieldEnum)[keyof typeof PushSubscriptionScalarFieldEnum]
+
+
+export const AttendanceScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  date: 'date',
+  status: 'status',
+  reason: 'reason',
+  notes: 'notes',
+  markedById: 'markedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
 
 
 export const SortOrder = {

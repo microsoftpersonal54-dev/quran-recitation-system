@@ -9,6 +9,7 @@ import { audit } from "@/server/audit";
 import { createNotification } from "@/server/notifications/service";
 import { sendPushToUser } from "@/server/push/push-service";
 import { db } from "@/lib/db";
+import { getParasForRange } from "@/lib/quran/paras";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,10 +39,14 @@ async function listAllRecordings() {
     select: {
       id: true,
       studentId: true,
+      qariId: true,
       surahNumber: true,
       surahName: true,
       ayahFrom: true,
       ayahTo: true,
+      paraNumber: true,
+      paraFrom: true,
+      paraTo: true,
       durationMs: true,
       notes: true,
       mimeType: true,
@@ -50,6 +55,7 @@ async function listAllRecordings() {
       uploadStatus: true,
       reviewStatus: true,
       student: { select: { id: true, name: true } },
+      qari: { select: { id: true, name: true } },
     },
   });
 }
@@ -96,10 +102,43 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const surahNumber = Number(form.get("surahNumber"));
+  const ayahFrom = Number(form.get("ayahFrom"));
+  const ayahTo = Number(form.get("ayahTo"));
+
+  // Auto-compute Paras from the surah/ayah range if not supplied.
+  let paraFrom: number | null = null;
+  let paraTo: number | null = null;
+  let paraNumber: number | null = null;
+  const auto = getParasForRange(surahNumber, ayahFrom, surahNumber, ayahTo);
+  if (auto) {
+    paraFrom = auto.paraFrom;
+    paraTo = auto.paraTo;
+    paraNumber = auto.paraFrom;
+  }
+
+  const formParaFrom = form.get("paraFrom");
+  const formParaTo = form.get("paraTo");
+  if (formParaFrom && formParaTo) {
+    paraFrom = Number(formParaFrom);
+    paraTo = Number(formParaTo);
+    paraNumber = paraFrom;
+  }
+
+  const qariIdRaw = form.get("qariId");
+  const qariId =
+    typeof qariIdRaw === "string" && qariIdRaw.trim().length > 0
+      ? qariIdRaw.trim()
+      : null;
+
   const meta = {
-    surahNumber: Number(form.get("surahNumber")),
-    ayahFrom: Number(form.get("ayahFrom")),
-    ayahTo: Number(form.get("ayahTo")),
+    surahNumber,
+    ayahFrom,
+    ayahTo,
+    paraNumber,
+    paraFrom,
+    paraTo,
+    qariId,
     durationMs: Number(form.get("durationMs")),
     notes: String(form.get("notes") ?? ""),
     timezone: String(form.get("timezone") ?? "UTC"),
@@ -133,7 +172,15 @@ export async function POST(req: NextRequest) {
 
     const ayahRange = `${created.ayahFrom}–${created.ayahTo}`;
     const durationLabel = formatDuration(created.durationMs);
-    const notificationBody = `${user.name} · ${created.surahName} · Ayahs ${ayahRange} · ${durationLabel}`;
+    const paraLabel =
+      created.paraFrom && created.paraTo
+        ? created.paraFrom === created.paraTo
+          ? `Para ${created.paraFrom}`
+          : `Paras ${created.paraFrom}–${created.paraTo}`
+        : "";
+    const notificationBody = `${user.name} · ${created.surahName} · Ayahs ${ayahRange}${
+      paraLabel ? ` · ${paraLabel}` : ""
+    } · ${durationLabel}`;
 
     // 1) In-app notification (bell icon / Alerts tab)
     await Promise.all(
@@ -149,7 +196,6 @@ export async function POST(req: NextRequest) {
     );
 
     // 2) Push notification (mobile popup in notification center).
-    //    Fire and forget — a push failure must never break the upload response.
     const pushPayload = {
       title: "New Quran Recitation",
       body: notificationBody,
@@ -172,6 +218,9 @@ export async function POST(req: NextRequest) {
         surah: created.surahNumber,
         ayahFrom: created.ayahFrom,
         ayahTo: created.ayahTo,
+        paraFrom: created.paraFrom,
+        paraTo: created.paraTo,
+        qariId: created.qariId,
         durationMs: created.durationMs,
         size: buf.byteLength,
         mime,
