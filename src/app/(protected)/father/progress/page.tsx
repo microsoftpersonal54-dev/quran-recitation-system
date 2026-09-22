@@ -1,14 +1,5 @@
-import { requireRole } from "@/lib/auth/guards";
-import ProgressView from "@/components/progress/ProgressView";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default async function FatherProgressPage() {
-  await requireRole(["FATHER"]);
-  return (
-    <ProgressView
-      title="Progress"
-      subtitle="Overall activity from every recording in the archive."
-    />
-  );
+export default function FatherProgressRedirect() {
+  redirect("/father/recordings");
 }
