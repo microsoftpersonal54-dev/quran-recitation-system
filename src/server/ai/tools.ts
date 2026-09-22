@@ -2,6 +2,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import { formatMs } from "@/lib/format";
 import { getSurah, SURAHS } from "@/lib/quran/surahs";
+import { PARAS } from "@/lib/quran/paras";
 
 export interface ToolDefinition {
   name: string;
@@ -27,7 +28,8 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: "get_recitation_by_id",
-    description: "Fetch a single recitation by ID, including mistakes.",
+    description:
+      "Fetch a single recitation by ID, including mistakes (both reviewer and student-noticed).",
     parameters: {
       type: "object",
       properties: { id: { type: "string" } },
@@ -37,7 +39,8 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: "get_mistakes",
-    description: "List mistakes in a date range. Optional category filter.",
+    description:
+      "List mistakes in a date range. Optional category filter. Includes both reviewer-marked and student-noticed mistakes.",
     parameters: {
       type: "object",
       properties: {
@@ -52,7 +55,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "get_progress_summary",
     description:
-      "Overall statistics: total recordings, time, mistakes, streaks, surahs, ayahs.",
+      "Overall statistics: total recordings, time, mistakes, streaks, surahs, ayahs, and paras covered.",
     parameters: {
       type: "object",
       properties: {},
@@ -83,7 +86,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "get_para_progress",
     description:
-      "Which Paras (Juz) of the Quran have been covered, with session counts and total time per Para. Use for 'how many paras has he done', 'which para is he on', 'what paras has he covered'.",
+      "Which Paras (Juz) of the Quran have been covered, with session counts, total time, mistake counts, and WHICH QUARTERS of each para were recited. Use for 'how many paras has he done', 'which para is he on', 'what quarters of para 1 has he covered', 'has he finished para 3'.",
     parameters: {
       type: "object",
       properties: {
@@ -126,7 +129,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: "get_day_detail",
     description:
-      "What happened on a specific date: attendance status, all recitation sessions, and mistake counts. Use for 'what did he do on September 15', 'show me last Tuesday'.",
+      "What happened on a specific date: attendance status, all recitation sessions, mistakes. Use for 'what did he do on September 15'.",
     parameters: {
       type: "object",
       properties: {
@@ -137,9 +140,22 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
       additionalProperties: false,
     },
   },
+  {
+    name: "get_student_noticed_mistakes",
+    description:
+      "Mistakes that the STUDENT self-reported during recording (source = STUDENT). Use for 'what mistakes did he notice himself', 'did he say anything went wrong'.",
+    parameters: {
+      type: "object",
+      properties: {
+        fromDate: { type: "string" },
+        toDate: { type: "string" },
+        studentName: { type: "string" },
+      },
+      required: ["fromDate", "toDate"],
+      additionalProperties: false,
+    },
+  },
 ];
-
-// -------- helpers --------
 
 function parseDay(s: unknown): Date | null {
   if (typeof s !== "string") return null;
@@ -175,10 +191,23 @@ function fmtDate(d: Date): string {
   });
 }
 
+function quarterLabel(q: number | null): string | null {
+  if (q == null) return null;
+  return `${q}/4`;
+}
+
+function paraName(n: number): string {
+  return PARAS[n - 1]?.name ?? `Para ${n}`;
+}
+
 async function resolveStudentId(studentName?: string) {
   if (!studentName || !studentName.trim()) return undefined;
   const s = await db.user.findFirst({
-    where: { role: "STUDENT", active: true, name: { contains: studentName.trim() } },
+    where: {
+      role: "STUDENT",
+      active: true,
+      name: { contains: studentName.trim() },
+    },
     select: { id: true, name: true },
   });
   return s ?? null;
@@ -211,6 +240,7 @@ async function getRecitations(args: Record<string, unknown>) {
       ayahTo: true,
       paraFrom: true,
       paraTo: true,
+      paraQuarter: true,
       durationMs: true,
       recordedAt: true,
       reviewStatus: true,
@@ -243,6 +273,8 @@ async function getRecitations(args: Record<string, unknown>) {
       ayahTo: r.ayahTo,
       paraFrom: r.paraFrom,
       paraTo: r.paraTo,
+      paraQuarter: r.paraQuarter,
+      paraQuarterLabel: quarterLabel(r.paraQuarter),
       durationFormatted: fmtDuration(r.durationMs),
       reviewStatus: r.reviewStatus,
       mistakeCount: r._count.mistakes,
@@ -262,11 +294,14 @@ async function getRecitationById(args: Record<string, unknown>) {
       qari: { select: { name: true } },
       mistakes: {
         orderBy: { timestampMs: "asc" },
-        include: { reviewer: { select: { name: true } } },
+        include: { reviewer: { select: { name: true, role: true } } },
       },
     },
   });
   if (!rec) return { error: "Recording not found." };
+
+  const reviewerMistakes = rec.mistakes.filter((m) => m.source !== "STUDENT");
+  const studentMistakes = rec.mistakes.filter((m) => m.source === "STUDENT");
 
   return {
     id: rec.id,
@@ -280,10 +315,14 @@ async function getRecitationById(args: Record<string, unknown>) {
     ayahTo: rec.ayahTo,
     paraFrom: rec.paraFrom,
     paraTo: rec.paraTo,
+    paraQuarter: rec.paraQuarter,
+    paraQuarterLabel: quarterLabel(rec.paraQuarter),
     durationFormatted: fmtDuration(rec.durationMs),
     reviewStatus: rec.reviewStatus,
     notes: rec.notes,
-    mistakes: rec.mistakes.map((m) => ({
+    reviewerMistakeCount: reviewerMistakes.length,
+    studentMistakeCount: studentMistakes.length,
+    reviewerMistakes: reviewerMistakes.map((m) => ({
       timestampFormatted: fmtDuration(m.timestampMs),
       ayahNumber: m.ayahNumber,
       category: m.category,
@@ -291,6 +330,12 @@ async function getRecitationById(args: Record<string, unknown>) {
       description: m.description,
       correction: m.correction,
       reviewer: m.reviewer.name,
+    })),
+    studentNoticed: studentMistakes.map((m) => ({
+      timestampFormatted: fmtDuration(m.timestampMs),
+      category: m.category,
+      severity: m.severity,
+      description: m.description,
     })),
   };
 }
@@ -330,8 +375,12 @@ async function getMistakes(args: Record<string, unknown>) {
   });
 
   const byCategory: Record<string, number> = {};
+  let studentNoticed = 0;
+  let reviewerMarked = 0;
   for (const m of rows) {
     byCategory[m.category] = (byCategory[m.category] ?? 0) + 1;
+    if (m.source === "STUDENT") studentNoticed += 1;
+    else reviewerMarked += 1;
   }
 
   return {
@@ -339,6 +388,8 @@ async function getMistakes(args: Record<string, unknown>) {
     toDate: args.toDate,
     category: category ?? null,
     count: rows.length,
+    studentNoticed,
+    reviewerMarked,
     byCategory,
     mistakes: rows.map((m) => ({
       recordingId: m.recording.id,
@@ -352,6 +403,7 @@ async function getMistakes(args: Record<string, unknown>) {
       severity: m.severity,
       description: m.description,
       correction: m.correction,
+      source: m.source,
       reviewer: m.reviewer.name,
     })),
   };
@@ -367,6 +419,7 @@ async function getProgressSummary() {
       ayahTo: true,
       paraFrom: true,
       paraTo: true,
+      paraQuarter: true,
       recordedAt: true,
       _count: { select: { mistakes: true } },
     },
@@ -379,6 +432,7 @@ async function getProgressSummary() {
   const ayahKeys = new Set<string>();
   const dayKeys = new Set<string>();
   const paras = new Set<number>();
+  const quarters = new Set<string>(); // "para:quarter"
 
   for (const r of recordings) {
     totalMs += r.durationMs;
@@ -389,6 +443,9 @@ async function getProgressSummary() {
     }
     if (r.paraFrom && r.paraTo) {
       for (let p = r.paraFrom; p <= r.paraTo; p++) paras.add(p);
+    }
+    if (r.paraFrom && r.paraQuarter) {
+      quarters.add(`${r.paraFrom}:${r.paraQuarter}`);
     }
     const d = new Date(r.recordedAt);
     dayKeys.add(
@@ -449,6 +506,10 @@ async function getProgressSummary() {
     surahsPracticed: surahs.size,
     ayahsCovered: ayahKeys.size,
     parasCovered: paras.size,
+    parasCoveredList: Array.from(paras)
+      .sort((a, b) => a - b)
+      .map((n) => ({ para: n, name: paraName(n) })),
+    quartersCoveredCount: quarters.size,
   };
 }
 
@@ -461,6 +522,8 @@ async function getUnreviewedRecordings() {
       surahName: true,
       ayahFrom: true,
       ayahTo: true,
+      paraFrom: true,
+      paraQuarter: true,
       durationMs: true,
       recordedAt: true,
       reviewStatus: true,
@@ -477,6 +540,8 @@ async function getUnreviewedRecordings() {
       student: r.student.name,
       surah: r.surahName,
       ayahRange: `${r.ayahFrom}–${r.ayahTo}`,
+      paraFrom: r.paraFrom,
+      paraQuarter: r.paraQuarter,
       durationFormatted: fmtDuration(r.durationMs),
       reviewStatus: r.reviewStatus,
       mistakeCount: r._count.mistakes,
@@ -560,6 +625,7 @@ async function getParaProgress(args: Record<string, unknown>) {
     select: {
       paraFrom: true,
       paraTo: true,
+      paraQuarter: true,
       durationMs: true,
       _count: { select: { mistakes: true } },
     },
@@ -567,7 +633,13 @@ async function getParaProgress(args: Record<string, unknown>) {
 
   const map = new Map<
     number,
-    { para: number; sessions: number; totalMs: number; mistakes: number }
+    {
+      para: number;
+      sessions: number;
+      totalMs: number;
+      mistakes: number;
+      quarters: Set<number>;
+    }
   >();
 
   for (const r of rows) {
@@ -578,12 +650,16 @@ async function getParaProgress(args: Record<string, unknown>) {
         existing.sessions += 1;
         existing.totalMs += r.durationMs;
         existing.mistakes += r._count.mistakes;
+        if (r.paraQuarter) existing.quarters.add(r.paraQuarter);
       } else {
+        const set = new Set<number>();
+        if (r.paraQuarter) set.add(r.paraQuarter);
         map.set(p, {
           para: p,
           sessions: 1,
           totalMs: r.durationMs,
           mistakes: r._count.mistakes,
+          quarters: set,
         });
       }
     }
@@ -595,12 +671,23 @@ async function getParaProgress(args: Record<string, unknown>) {
     fromDate: args.fromDate ?? null,
     toDate: args.toDate ?? null,
     totalParasCovered: paras.length,
-    paras: paras.map((p) => ({
-      para: p.para,
-      sessions: p.sessions,
-      totalFormatted: fmtDuration(p.totalMs),
-      mistakes: p.mistakes,
-    })),
+    paras: paras.map((p) => {
+      const qList = Array.from(p.quarters).sort((a, b) => a - b);
+      return {
+        para: p.para,
+        name: paraName(p.para),
+        sessions: p.sessions,
+        totalFormatted: fmtDuration(p.totalMs),
+        mistakes: p.mistakes,
+        quarters: qList,
+        quartersCovered: qList.length,
+        quartersLabel:
+          qList.length === 0
+            ? "unknown"
+            : qList.map((q) => `${q}/4`).join(", "),
+        fullyCovered: qList.length === 4,
+      };
+    }),
   };
 }
 
@@ -618,7 +705,8 @@ async function getAttendance(args: Record<string, unknown>) {
   if (studentName) {
     const resolved = await resolveStudentId(studentName);
     if (!resolved) return { error: `No student named "${studentName}".` };
-    if (resolved === null) return { error: `Multiple students match "${studentName}".` };
+    if (resolved === null)
+      return { error: `Multiple students match "${studentName}".` };
     studentId = resolved.id;
   }
 
@@ -651,7 +739,9 @@ async function getAttendance(args: Record<string, unknown>) {
       dateIso: new Date(r.date).toISOString().slice(0, 10),
       status: r.status,
       reason: r.reason,
-      markedBy: r.markedBy ? `${r.markedBy.name} (${r.markedBy.role})` : null,
+      markedBy: r.markedBy
+        ? `${r.markedBy.name} (${r.markedBy.role})`
+        : null,
     })),
   };
 }
@@ -670,7 +760,8 @@ async function getLeaves(args: Record<string, unknown>) {
   if (studentName) {
     const resolved = await resolveStudentId(studentName);
     if (!resolved) return { error: `No student named "${studentName}".` };
-    if (resolved === null) return { error: `Multiple students match "${studentName}".` };
+    if (resolved === null)
+      return { error: `Multiple students match "${studentName}".` };
     studentId = resolved.id;
   }
 
@@ -712,11 +803,11 @@ async function getDayDetail(args: Record<string, unknown>) {
   if (studentName) {
     const resolved = await resolveStudentId(studentName);
     if (!resolved) return { error: `No student named "${studentName}".` };
-    if (resolved === null) return { error: `Multiple students match "${studentName}".` };
+    if (resolved === null)
+      return { error: `Multiple students match "${studentName}".` };
     studentId = resolved.id;
     studentDisplay = resolved.name;
   } else {
-    // If no name given, default to the first active student.
     const first = await db.user.findFirst({
       where: { role: "STUDENT", active: true },
       orderBy: { name: "asc" },
@@ -727,7 +818,9 @@ async function getDayDetail(args: Record<string, unknown>) {
     studentDisplay = first.name;
   }
 
-  const dayStart = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayStart = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
   const dayEnd = new Date(dayStart);
   dayEnd.setUTCHours(23, 59, 59, 999);
 
@@ -768,6 +861,8 @@ async function getDayDetail(args: Record<string, unknown>) {
       ayahRange: `${r.ayahFrom}–${r.ayahTo}`,
       paraFrom: r.paraFrom,
       paraTo: r.paraTo,
+      paraQuarter: r.paraQuarter,
+      paraQuarterLabel: quarterLabel(r.paraQuarter),
       durationFormatted: fmtDuration(r.durationMs),
       reviewStatus: r.reviewStatus,
       mistakeCount: r._count.mistakes,
@@ -776,7 +871,64 @@ async function getDayDetail(args: Record<string, unknown>) {
   };
 }
 
-// -------- dispatcher --------
+async function getStudentNoticedMistakes(args: Record<string, unknown>) {
+  const from = parseDay(args.fromDate);
+  const to = parseDay(args.toDate);
+  if (!from || !to) return { error: "Invalid date range." };
+
+  const studentName =
+    typeof args.studentName === "string" && args.studentName.trim().length > 0
+      ? args.studentName.trim()
+      : undefined;
+
+  const rows = await db.mistake.findMany({
+    where: {
+      source: "STUDENT",
+      recording: {
+        deletedAt: null,
+        recordedAt: { gte: from, lte: endOfDay(to) },
+        ...(studentName
+          ? { student: { name: { contains: studentName } } }
+          : {}),
+      },
+    },
+    orderBy: { createdAt: "asc" },
+    include: {
+      recording: {
+        select: {
+          id: true,
+          surahName: true,
+          ayahFrom: true,
+          ayahTo: true,
+          paraFrom: true,
+          paraQuarter: true,
+          recordedAt: true,
+          student: { select: { name: true } },
+        },
+      },
+    },
+  });
+
+  return {
+    fromDate: args.fromDate,
+    toDate: args.toDate,
+    studentName: studentName ?? null,
+    count: rows.length,
+    mistakes: rows.map((m) => ({
+      recordingId: m.recording.id,
+      date: fmtDate(new Date(m.recording.recordedAt)),
+      student: m.recording.student.name,
+      surah: m.recording.surahName,
+      ayahRange: `${m.recording.ayahFrom}–${m.recording.ayahTo}`,
+      paraFrom: m.recording.paraFrom,
+      paraQuarter: m.recording.paraQuarter,
+      timestampFormatted: fmtDuration(m.timestampMs),
+      category: m.category,
+      severity: m.severity,
+      description: m.description,
+    })),
+  };
+}
 
 export async function executeTool(
   name: string,
@@ -811,6 +963,8 @@ export async function executeTool(
         return await getLeaves(args);
       case "get_day_detail":
         return await getDayDetail(args);
+      case "get_student_noticed_mistakes":
+        return await getStudentNoticedMistakes(args);
       default:
         return { error: `Unknown tool: ${name}` };
     }
