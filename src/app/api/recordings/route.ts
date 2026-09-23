@@ -15,8 +15,6 @@ import { getParasForRange } from "@/lib/quran/paras";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_UPLOAD_FIELD_BYTES = 51 * 1024 * 1024;
-
 function localDayInZone(timezone: string): Date {
   const now = new Date();
   try {
@@ -39,10 +37,6 @@ function localDayInZone(timezone: string): Date {
   }
 }
 
-/**
- * Parses "YYYY-MM-DD" (from a date input) into a Date at noon UTC.
- * Also returns the UTC-midnight version for attendance.
- */
 function parseBackdate(isoDate: string): {
   recordedAt: Date;
   attendanceDay: Date;
@@ -68,7 +62,6 @@ async function markPresentIfAbsent(
       select: { id: true },
     });
     if (existing) return;
-
     await db.attendance.create({
       data: {
         studentId,
@@ -128,6 +121,19 @@ async function listAllRecordings() {
   });
 }
 
+const studentMistakesSchema = (raw: unknown): StudentMistakeInput[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (m): m is StudentMistakeInput =>
+        typeof m === "object" &&
+        m !== null &&
+        typeof (m as StudentMistakeInput).description === "string" &&
+        typeof (m as StudentMistakeInput).timestampMs === "number"
+    )
+    .slice(0, 20);
+};
+
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
@@ -140,41 +146,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let form: FormData;
+  let body: Record<string, unknown>;
   try {
-    form = await req.formData();
+    body = (await req.json()) as Record<string, unknown>;
   } catch {
-    return NextResponse.json(
-      { error: "Expected multipart/form-data." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const audio = form.get("audio");
-  if (!(audio instanceof Blob)) {
-    return NextResponse.json(
-      { error: "Missing 'audio' file." },
-      { status: 400 }
-    );
-  }
-  if (audio.size === 0) {
-    return NextResponse.json(
-      { error: "The audio file is empty." },
-      { status: 400 }
-    );
-  }
-  if (audio.size > MAX_UPLOAD_FIELD_BYTES) {
-    return NextResponse.json(
-      { error: "The audio file is too large." },
-      { status: 413 }
-    );
-  }
-
-  const surahNumber = Number(form.get("surahNumber"));
-  const ayahFrom = Number(form.get("ayahFrom"));
-  const ayahTo = Number(form.get("ayahTo"));
-  const paraQuarterRaw = form.get("paraQuarter");
-  const paraQuarter = paraQuarterRaw ? Number(paraQuarterRaw) : null;
+  const surahNumber = Number(body.surahNumber);
+  const ayahFrom = Number(body.ayahFrom);
+  const ayahTo = Number(body.ayahTo);
+  const paraQuarter =
+    body.paraQuarter != null ? Number(body.paraQuarter) : null;
 
   let paraFrom: number | null = null;
   let paraTo: number | null = null;
@@ -186,45 +169,14 @@ export async function POST(req: NextRequest) {
     paraNumber = auto.paraFrom;
   }
 
-  const formParaFrom = form.get("paraFrom");
-  const formParaTo = form.get("paraTo");
-  if (formParaFrom && formParaTo) {
-    paraFrom = Number(formParaFrom);
-    paraTo = Number(formParaTo);
-    paraNumber = paraFrom;
-  }
-
-  const qariIdRaw = form.get("qariId");
   const qariId =
-    typeof qariIdRaw === "string" && qariIdRaw.trim().length > 0
-      ? qariIdRaw.trim()
+    typeof body.qariId === "string" && body.qariId.trim().length > 0
+      ? body.qariId.trim()
       : null;
 
-  const mistakesRaw = form.get("studentMistakes");
-  let studentMistakes: StudentMistakeInput[] = [];
-  if (typeof mistakesRaw === "string" && mistakesRaw.trim().length > 0) {
-    try {
-      const parsed = JSON.parse(mistakesRaw) as unknown;
-      if (Array.isArray(parsed)) {
-        studentMistakes = parsed
-          .filter(
-            (m): m is StudentMistakeInput =>
-              typeof m === "object" &&
-              m !== null &&
-              typeof (m as StudentMistakeInput).description === "string" &&
-              typeof (m as StudentMistakeInput).timestampMs === "number"
-          )
-          .slice(0, 20);
-      }
-    } catch {
-      studentMistakes = [];
-    }
-  }
+  const timezone = String(body.timezone ?? "UTC");
 
-  const timezone = String(form.get("timezone") ?? "UTC");
-
-  // ---- Backdating support ----
-  const backdateRaw = form.get("recordedAt");
+  const backdateRaw = body.recordedAt;
   let recordedAtOverride: Date | undefined;
   let attendanceDay: Date;
   if (typeof backdateRaw === "string" && backdateRaw.trim().length > 0) {
@@ -248,9 +200,14 @@ export async function POST(req: NextRequest) {
     paraTo,
     paraQuarter,
     qariId,
-    durationMs: Number(form.get("durationMs")),
-    notes: String(form.get("notes") ?? ""),
+    durationMs: Number(body.durationMs),
+    notes: String(body.notes ?? ""),
     timezone,
+    cloudinaryUrl: String(body.cloudinaryUrl ?? ""),
+    cloudinaryPublicId: String(body.cloudinaryPublicId ?? ""),
+    cloudinaryBytes: Number(body.cloudinaryBytes ?? 0),
+    mimeType: String(body.mimeType ?? "audio/webm"),
+    checksum: body.checksum ? String(body.checksum) : null,
   };
 
   const parsed = createRecordingSchema.safeParse(meta);
@@ -261,20 +218,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const mime = audio.type || "application/octet-stream";
-  const buf = Buffer.from(await audio.arrayBuffer());
+  const studentMistakes = studentMistakesSchema(body.studentMistakes);
 
   try {
     const created = await createRecording({
       studentId: user.id,
-      fileBuffer: buf,
-      mimeType: mime,
+      ...parsed.data,
       studentMistakes,
       recordedAtOverride,
-      ...parsed.data,
     });
 
-    // Auto-mark PRESENT for the (possibly backdated) day.
     await markPresentIfAbsent(user.id, attendanceDay);
 
     const recipients = await db.user.findMany({
@@ -354,8 +307,7 @@ export async function POST(req: NextRequest) {
         durationMs: created.durationMs,
         studentMistakeCount: created.studentMistakeCount,
         backdated: Boolean(recordedAtOverride),
-        size: buf.byteLength,
-        mime,
+        cloudinaryBytes: parsed.data.cloudinaryBytes,
       },
     });
 
@@ -363,9 +315,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const code = (err as Error).message;
     if (
-      code === "UNSUPPORTED_MIME" ||
-      code === "EMPTY_FILE" ||
-      code === "FILE_TOO_LARGE" ||
       code === "UNKNOWN_SURAH" ||
       code === "INVALID_AYAH_RANGE"
     ) {

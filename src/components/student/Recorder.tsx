@@ -24,6 +24,7 @@ import {
   QUARTER_LABELS,
   guessQuarter,
 } from "@/lib/quran/quarters";
+import { uploadToCloudinary } from "@/lib/cloudinary/direct-upload";
 import SurahSelector from "./SurahSelector";
 import QariPicker from "./QariPicker";
 
@@ -79,6 +80,9 @@ export default function Recorder({ studentName }: Props) {
   );
 
   const [uploading, setUploading] = useState(false);
+  const [uploadStage, setUploadStage] = useState<
+    "idle" | "cloud" | "save"
+  >("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [queued, setQueued] = useState(false);
@@ -115,6 +119,7 @@ export default function Recorder({ studentName }: Props) {
     rec.reset();
     setUploadError(null);
     setUploadProgress(0);
+    setUploadStage("idle");
     setQueued(false);
     setStudentMistakes([]);
   }
@@ -154,6 +159,7 @@ export default function Recorder({ studentName }: Props) {
     if (!rec.take || uploading) return;
     setUploadError(null);
     setUploading(true);
+    setUploadStage("cloud");
     setUploadProgress(0);
 
     const timezone =
@@ -171,91 +177,91 @@ export default function Recorder({ studentName }: Props) {
     const backdateValue =
       dateMode === "custom" && customDate ? customDate : null;
 
-    const payload = {
-      blob: rec.take.blob,
-      mimeType: rec.take.mimeType,
-      durationMs: rec.take.durationMs,
-      surahNumber,
-      ayahFrom,
-      ayahTo,
-      paraNumber: paraRange?.paraFrom ?? null,
-      paraFrom: paraRange?.paraFrom ?? null,
-      paraTo: paraRange?.paraTo ?? null,
-      paraQuarter,
-      qariId,
-      notes,
-      timezone,
-      studentMistakes: cleanedMistakes,
-      recordedAt: backdateValue,
-    };
-
     try {
-      const form = new FormData();
-      const ext = extensionFromMime(rec.take.mimeType);
-      form.append("audio", rec.take.blob, `recording.${ext}`);
-      form.append("surahNumber", String(surahNumber));
-      form.append("ayahFrom", String(ayahFrom));
-      form.append("ayahTo", String(ayahTo));
-      if (paraRange) {
-        form.append("paraFrom", String(paraRange.paraFrom));
-        form.append("paraTo", String(paraRange.paraTo));
-      }
-      if (paraQuarter != null) {
-        form.append("paraQuarter", String(paraQuarter));
-      }
-      if (qariId) form.append("qariId", qariId);
-      form.append("durationMs", String(rec.take.durationMs));
-      form.append("notes", notes);
-      form.append("timezone", timezone);
-      if (cleanedMistakes.length > 0) {
-        form.append("studentMistakes", JSON.stringify(cleanedMistakes));
-      }
-      if (backdateValue) {
-        form.append("recordedAt", backdateValue);
-      }
-
-      const { status, body } = await uploadWithProgress(
-        "/api/recordings",
-        form,
-        setUploadProgress
+      // ---- Step 1: Upload directly to Cloudinary (bypasses Vercel limits) ----
+      const cloudinaryResult = await uploadToCloudinary(
+        rec.take.blob,
+        (p) => setUploadProgress(p.percent)
       );
 
-      if (status >= 200 && status < 300) {
+      // ---- Step 2: Send only the metadata to our API ----
+      setUploadStage("save");
+      setUploadProgress(100);
+
+      const payload = {
+        surahNumber,
+        ayahFrom,
+        ayahTo,
+        paraQuarter,
+        qariId,
+        durationMs: rec.take.durationMs,
+        notes,
+        timezone,
+        studentMistakes: cleanedMistakes,
+        recordedAt: backdateValue,
+        cloudinaryUrl: cloudinaryResult.secure_url,
+        cloudinaryPublicId: cloudinaryResult.public_id,
+        cloudinaryBytes: cloudinaryResult.bytes,
+        mimeType: rec.take.mimeType,
+      };
+
+      const res = await fetch("/api/recordings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok) {
         router.push("/student");
         router.refresh();
         return;
       }
-      if (status >= 400 && status < 500) {
-        throw new Error(body?.error ?? `Upload failed (${status}).`);
-      }
-      throw new Error("SERVER_ERROR");
+
+      // If metadata save failed, surface it clearly.
+      throw new Error(data?.error ?? `Could not save recording (${res.status}).`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
+      const msg = err instanceof Error ? err.message : "Upload failed.";
+
+      // If the Cloudinary upload itself failed due to network, queue it.
       const shouldQueue =
-        msg === "SERVER_ERROR" ||
-        msg === "Network error during upload." ||
-        msg === "Upload timed out." ||
-        msg === "Failed to fetch" ||
+        msg.includes("Network error") ||
+        msg.includes("Failed to fetch") ||
         !navigator.onLine;
 
       if (shouldQueue) {
         try {
           const { enqueue } = await import("@/lib/offline/queue");
-          await enqueue(payload);
+          await enqueue({
+            blob: rec.take.blob,
+            mimeType: rec.take.mimeType,
+            durationMs: rec.take.durationMs,
+            surahNumber,
+            ayahFrom,
+            ayahTo,
+            paraNumber: paraRange?.paraFrom ?? null,
+            paraFrom: paraRange?.paraFrom ?? null,
+            paraTo: paraRange?.paraTo ?? null,
+            paraQuarter,
+            qariId,
+            notes,
+            timezone,
+            studentMistakes: cleanedMistakes,
+            recordedAt: backdateValue,
+          });
           setUploading(false);
+          setUploadStage("idle");
           setQueued(true);
           return;
         } catch (queueErr) {
           console.error("[handleSave] queue failed", queueErr);
-          const detail =
-            queueErr instanceof Error ? queueErr.message : "unknown error";
-          setUploadError(`Could not save locally: ${detail}`);
-          setUploading(false);
-          return;
         }
       }
-      setUploadError(msg || "Upload failed. Please try again.");
+
+      setUploadError(msg);
       setUploading(false);
+      setUploadStage("idle");
     }
   }
 
@@ -321,6 +327,7 @@ export default function Recorder({ studentName }: Props) {
             : "Today"
         }
         uploading={uploading}
+        uploadStage={uploadStage}
         uploadProgress={uploadProgress}
         uploadError={uploadError}
         queued={queued}
@@ -357,50 +364,6 @@ export default function Recorder({ studentName }: Props) {
       onStart={handleStart}
     />
   );
-}
-
-function extensionFromMime(mime: string): string {
-  const m = mime.toLowerCase();
-  if (m.includes("webm")) return "webm";
-  if (m.includes("ogg")) return "ogg";
-  if (m.includes("mp4") || m.includes("m4a")) return "m4a";
-  if (m.includes("mpeg") || m.includes("mp3")) return "mp3";
-  if (m.includes("wav")) return "wav";
-  return "bin";
-}
-
-interface UploadResult {
-  status: number;
-  body: { error?: string; recording?: { id: string } } | null;
-}
-
-function uploadWithProgress(
-  url: string,
-  form: FormData,
-  onProgress: (pct: number) => void
-): Promise<UploadResult> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        onProgress(Math.min(99, Math.round((e.loaded / e.total) * 100)));
-      }
-    };
-    xhr.onload = () => {
-      let body: UploadResult["body"] = null;
-      try {
-        body = JSON.parse(xhr.responseText);
-      } catch {
-        /* ignore */
-      }
-      onProgress(100);
-      resolve({ status: xhr.status, body });
-    };
-    xhr.onerror = () => reject(new Error("Network error during upload."));
-    xhr.ontimeout = () => reject(new Error("Upload timed out."));
-    xhr.send(form);
-  });
 }
 
 // ==================== SETUP VIEW ====================
@@ -462,7 +425,6 @@ function SetupView({
       </header>
 
       <div className="space-y-6">
-        {/* ---- DATE PICKER ---- */}
         <div>
           <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-neutral-800">
             <CalendarClock className="h-4 w-4" aria-hidden />
@@ -744,7 +706,7 @@ function Waveform({ active, level }: { active: boolean; level: number }) {
   );
 }
 
-// ==================== PREVIEW + MISTAKES EDITOR ====================
+// ==================== PREVIEW + MISTAKES ====================
 
 function PreviewView({
   studentName,
@@ -763,6 +725,7 @@ function PreviewView({
   onRemoveMistake,
   dateLabel,
   uploading,
+  uploadStage,
   uploadProgress,
   uploadError,
   queued,
@@ -786,6 +749,7 @@ function PreviewView({
   onRemoveMistake: (id: string) => void;
   dateLabel: string;
   uploading: boolean;
+  uploadStage: "idle" | "cloud" | "save";
   uploadProgress: number;
   uploadError: string | null;
   queued: boolean;
@@ -821,7 +785,6 @@ function PreviewView({
         </h1>
       </header>
 
-      {/* Summary */}
       <div className="rounded-xl border border-neutral-200 bg-white p-4">
         <dl className="grid grid-cols-2 gap-y-3 text-sm">
           <dt className="text-neutral-500">Date</dt>
@@ -870,14 +833,12 @@ function PreviewView({
         )}
       </div>
 
-      {/* Playback */}
       {audioUrl && (
         <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
           <audio src={audioUrl} controls preload="metadata" className="w-full" />
         </div>
       )}
 
-      {/* STUDENT MISTAKES EDITOR */}
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900">
           <AlertTriangle className="h-4 w-4" aria-hidden />
@@ -995,7 +956,6 @@ function PreviewView({
         </button>
       </div>
 
-      {/* Errors + progress */}
       {uploadError && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {uploadError}
@@ -1005,7 +965,11 @@ function PreviewView({
       {uploading && (
         <div className="mt-4 rounded-md border border-neutral-200 bg-white p-3">
           <div className="flex items-center justify-between text-xs text-neutral-700">
-            <span>Uploading…</span>
+            <span>
+              {uploadStage === "cloud"
+                ? "Uploading audio…"
+                : "Saving record…"}
+            </span>
             <span className="font-mono">{uploadProgress}%</span>
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-200">
@@ -1014,6 +978,11 @@ function PreviewView({
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
+          <p className="mt-2 text-[10px] text-neutral-500">
+            {uploadStage === "cloud"
+              ? "Audio is uploading straight to storage. This is safe — even for long recordings."
+              : "Creating the record in the database."}
+          </p>
         </div>
       )}
 
@@ -1028,7 +997,6 @@ function PreviewView({
         </div>
       )}
 
-      {/* Actions */}
       <div className="mt-6 space-y-3">
         {!queued && (
           <button

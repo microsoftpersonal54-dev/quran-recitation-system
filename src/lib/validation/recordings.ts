@@ -14,6 +14,13 @@ export const createRecordingSchema = z
     durationMs: z.number().int().min(100).max(4 * 60 * 60 * 1000),
     notes: z.string().max(2000).optional().default(""),
     timezone: z.string().max(64).optional().default("UTC"),
+
+    // Cloudinary metadata (required with the direct-upload flow).
+    cloudinaryUrl: z.string().url(),
+    cloudinaryPublicId: z.string().min(1),
+    cloudinaryBytes: z.number().int().min(1),
+    mimeType: z.string().min(1).max(120),
+    checksum: z.string().max(128).optional().nullable(),
   })
   .superRefine((val, ctx) => {
     const surah = getSurah(val.surahNumber);
