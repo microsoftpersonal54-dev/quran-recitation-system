@@ -17,11 +17,6 @@ export const dynamic = "force-dynamic";
 
 const MAX_UPLOAD_FIELD_BYTES = 51 * 1024 * 1024;
 
-/**
- * Returns midnight UTC of the client's local calendar day.
- * Uses the client's timezone string (e.g. "Asia/Karachi") so a recording
- * made at 1 AM local time still lands on the correct calendar day.
- */
 function localDayInZone(timezone: string): Date {
   const now = new Date();
   try {
@@ -38,7 +33,6 @@ function localDayInZone(timezone: string): Date {
     if (!y || !m || !d) throw new Error("bad parts");
     return new Date(Date.UTC(y, m - 1, d));
   } catch {
-    // Fallback: UTC day.
     return new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     );
@@ -46,16 +40,29 @@ function localDayInZone(timezone: string): Date {
 }
 
 /**
- * Auto-marks the student PRESENT for today's local date — but only if
- * there is no existing attendance row for that day. If the student has
- * already marked LEAVE, we respect that and do nothing.
+ * Parses "YYYY-MM-DD" (from a date input) into a Date at noon UTC.
+ * Also returns the UTC-midnight version for attendance.
  */
+function parseBackdate(isoDate: string): {
+  recordedAt: Date;
+  attendanceDay: Date;
+} | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]) - 1;
+  const d = Number(m[3]);
+  return {
+    recordedAt: new Date(Date.UTC(y, mo, d, 12, 0, 0)),
+    attendanceDay: new Date(Date.UTC(y, mo, d)),
+  };
+}
+
 async function markPresentIfAbsent(
   studentId: string,
-  timezone: string
+  dayDate: Date
 ): Promise<void> {
   try {
-    const dayDate = localDayInZone(timezone);
     const existing = await db.attendance.findUnique({
       where: { studentId_date: { studentId, date: dayDate } },
       select: { id: true },
@@ -73,7 +80,6 @@ async function markPresentIfAbsent(
       },
     });
   } catch (err) {
-    // Never fail the upload because of attendance marking.
     console.warn("[recordings] auto-attendance failed", err);
   }
 }
@@ -217,6 +223,22 @@ export async function POST(req: NextRequest) {
 
   const timezone = String(form.get("timezone") ?? "UTC");
 
+  // ---- Backdating support ----
+  const backdateRaw = form.get("recordedAt");
+  let recordedAtOverride: Date | undefined;
+  let attendanceDay: Date;
+  if (typeof backdateRaw === "string" && backdateRaw.trim().length > 0) {
+    const parsedBackdate = parseBackdate(backdateRaw.trim());
+    if (parsedBackdate) {
+      recordedAtOverride = parsedBackdate.recordedAt;
+      attendanceDay = parsedBackdate.attendanceDay;
+    } else {
+      attendanceDay = localDayInZone(timezone);
+    }
+  } else {
+    attendanceDay = localDayInZone(timezone);
+  }
+
   const meta = {
     surahNumber,
     ayahFrom,
@@ -248,11 +270,12 @@ export async function POST(req: NextRequest) {
       fileBuffer: buf,
       mimeType: mime,
       studentMistakes,
+      recordedAtOverride,
       ...parsed.data,
     });
 
-    // --- Auto-mark PRESENT for the student's local day ---
-    await markPresentIfAbsent(user.id, timezone);
+    // Auto-mark PRESENT for the (possibly backdated) day.
+    await markPresentIfAbsent(user.id, attendanceDay);
 
     const recipients = await db.user.findMany({
       where: { active: true, role: { in: ["FATHER", "QARI"] } },
@@ -275,10 +298,16 @@ export async function POST(req: NextRequest) {
             created.studentMistakeCount === 1 ? "" : "s"
           } by student`
         : "";
+    const backdateNote = recordedAtOverride
+      ? ` · for ${recordedAtOverride.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        })}`
+      : "";
 
     const notificationBody = `${user.name} · ${created.surahName} · Ayahs ${ayahRange}${
       paraLabel ? ` · ${paraLabel}` : ""
-    } · ${durationLabel}${mistakeNote}`;
+    } · ${durationLabel}${mistakeNote}${backdateNote}`;
 
     await Promise.all(
       recipients.map((r) =>
@@ -286,14 +315,18 @@ export async function POST(req: NextRequest) {
           recipientId: r.id,
           recordingId: created.id,
           type: "NEW_RECORDING",
-          title: "New Quran Recitation",
+          title: recordedAtOverride
+            ? "New Recitation (backdated)"
+            : "New Quran Recitation",
           body: notificationBody,
         })
       )
     );
 
     const pushPayload = {
-      title: "New Quran Recitation",
+      title: recordedAtOverride
+        ? "New Recitation (backdated)"
+        : "New Quran Recitation",
       body: notificationBody,
       url: `/father/recordings/${created.id}`,
     };
@@ -320,6 +353,7 @@ export async function POST(req: NextRequest) {
         qariId: created.qariId,
         durationMs: created.durationMs,
         studentMistakeCount: created.studentMistakeCount,
+        backdated: Boolean(recordedAtOverride),
         size: buf.byteLength,
         mime,
       },

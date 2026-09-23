@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Plus,
   Trash2,
-  SkipForward,
+  CalendarClock,
+  CalendarDays,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMediaRecorder } from "@/hooks/useMediaRecorder";
@@ -51,6 +52,14 @@ const CATEGORIES = [
 
 const SEVERITIES = ["MINOR", "MEDIUM", "MAJOR"];
 
+function todayIso(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export default function Recorder({ studentName }: Props) {
   const router = useRouter();
   const rec = useMediaRecorder();
@@ -61,6 +70,10 @@ export default function Recorder({ studentName }: Props) {
   const [paraQuarter, setParaQuarter] = useState<QuarterNumber | null>(null);
   const [notes, setNotes] = useState("");
   const [qariId, setQariId] = useState<string | null>(null);
+
+  // Backdating support
+  const [dateMode, setDateMode] = useState<"today" | "custom">("today");
+  const [customDate, setCustomDate] = useState<string>(todayIso());
 
   const [studentMistakes, setStudentMistakes] = useState<StudentMistakeDraft[]>(
     []
@@ -84,7 +97,6 @@ export default function Recorder({ studentName }: Props) {
       : `Paras ${paraRange.paraFrom}–${paraRange.paraTo}`
     : null;
 
-  // Auto-suggest the quarter whenever ayahFrom changes within a single para.
   useEffect(() => {
     if (singlePara) {
       const g = guessQuarter(singlePara, surahNumber, ayahFrom);
@@ -114,9 +126,6 @@ export default function Recorder({ studentName }: Props) {
   }
 
   function addStudentMistake() {
-    const currentSec = rec.take
-      ? Math.round(rec.take.durationMs / 1000)
-      : 0;
     setStudentMistakes((prev) => [
       ...prev,
       {
@@ -160,6 +169,9 @@ export default function Recorder({ studentName }: Props) {
         description: m.description.trim(),
       }));
 
+    const backdateValue =
+      dateMode === "custom" && customDate ? customDate : null;
+
     const payload = {
       blob: rec.take.blob,
       mimeType: rec.take.mimeType,
@@ -175,6 +187,7 @@ export default function Recorder({ studentName }: Props) {
       notes,
       timezone,
       studentMistakes: cleanedMistakes,
+      recordedAt: backdateValue,
     };
 
     try {
@@ -197,6 +210,9 @@ export default function Recorder({ studentName }: Props) {
       form.append("timezone", timezone);
       if (cleanedMistakes.length > 0) {
         form.append("studentMistakes", JSON.stringify(cleanedMistakes));
+      }
+      if (backdateValue) {
+        form.append("recordedAt", backdateValue);
       }
 
       const { status, body } = await uploadWithProgress(
@@ -291,10 +307,19 @@ export default function Recorder({ studentName }: Props) {
         paraLabel={paraLabel}
         paraQuarter={paraQuarter}
         notes={notes}
-        mistakes={studentMistakes}
-        onAddMistake={addStudentMistake}
-        onUpdateMistake={updateStudentMistake}
-        onRemoveMistake={removeStudentMistake}
+        mistakeCount={studentMistakes.filter(
+          (m) => m.description.trim().length > 0
+        ).length}
+        dateLabel={
+          dateMode === "custom"
+            ? new Date(customDate + "T12:00:00").toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "Today"
+        }
         uploading={uploading}
         uploadProgress={uploadProgress}
         uploadError={uploadError}
@@ -319,6 +344,10 @@ export default function Recorder({ studentName }: Props) {
       notes={notes}
       qariId={qariId}
       onQariChange={setQariId}
+      dateMode={dateMode}
+      customDate={customDate}
+      onDateModeChange={setDateMode}
+      onCustomDateChange={setCustomDate}
       onSurahChange={(v) => {
         setSurahNumber(v.surahNumber);
         setAyahFrom(v.ayahFrom);
@@ -388,6 +417,10 @@ function SetupView({
   notes,
   qariId,
   onQariChange,
+  dateMode,
+  customDate,
+  onDateModeChange,
+  onCustomDateChange,
   onSurahChange,
   onNotesChange,
   onStart,
@@ -403,6 +436,10 @@ function SetupView({
   notes: string;
   qariId: string | null;
   onQariChange: (id: string | null) => void;
+  dateMode: "today" | "custom";
+  customDate: string;
+  onDateModeChange: (m: "today" | "custom") => void;
+  onCustomDateChange: (iso: string) => void;
   onSurahChange: (v: {
     surahNumber: number;
     ayahFrom: number;
@@ -411,6 +448,9 @@ function SetupView({
   onNotesChange: (v: string) => void;
   onStart: () => void;
 }) {
+  const today = todayIso();
+  const maxDate = today; // can't pick a future date
+
   return (
     <div>
       <header className="mb-6">
@@ -423,6 +463,62 @@ function SetupView({
       </header>
 
       <div className="space-y-6">
+        {/* ---- DATE PICKER ---- */}
+        <div>
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-neutral-800">
+            <CalendarClock className="h-4 w-4" aria-hidden />
+            When was this recited?
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => onDateModeChange("today")}
+              className={`flex items-center justify-center gap-2 rounded-md border px-3 py-3 text-sm font-medium ${
+                dateMode === "today"
+                  ? "border-neutral-900 bg-neutral-900 text-white"
+                  : "border-neutral-300 bg-white text-neutral-800 hover:border-neutral-500"
+              }`}
+            >
+              <CalendarDays className="h-4 w-4" aria-hidden />
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => onDateModeChange("custom")}
+              className={`flex items-center justify-center gap-2 rounded-md border px-3 py-3 text-sm font-medium ${
+                dateMode === "custom"
+                  ? "border-neutral-900 bg-neutral-900 text-white"
+                  : "border-neutral-300 bg-white text-neutral-800 hover:border-neutral-500"
+              }`}
+            >
+              <CalendarClock className="h-4 w-4" aria-hidden />
+              Custom date
+            </button>
+          </div>
+
+          {dateMode === "custom" && (
+            <div className="mt-2">
+              <label
+                htmlFor="customDate"
+                className="block text-xs font-medium text-neutral-600"
+              >
+                Pick a date (past)
+              </label>
+              <input
+                id="customDate"
+                type="date"
+                value={customDate}
+                max={maxDate}
+                onChange={(e) => onCustomDateChange(e.target.value)}
+                className="mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-3 text-base text-neutral-900 focus:border-neutral-900 focus:outline-none"
+              />
+              <p className="mt-1 text-[11px] text-neutral-500">
+                Attendance for this date will be marked automatically.
+              </p>
+            </div>
+          )}
+        </div>
+
         <SurahSelector
           surahNumber={surahNumber}
           ayahFrom={ayahFrom}
@@ -649,7 +745,7 @@ function Waveform({ active, level }: { active: boolean; level: number }) {
   );
 }
 
-// ==================== PREVIEW + MISTAKES ====================
+// ==================== PREVIEW ====================
 
 function PreviewView({
   studentName,
@@ -662,10 +758,8 @@ function PreviewView({
   paraLabel,
   paraQuarter,
   notes,
-  mistakes,
-  onAddMistake,
-  onUpdateMistake,
-  onRemoveMistake,
+  mistakeCount,
+  dateLabel,
   uploading,
   uploadProgress,
   uploadError,
@@ -684,10 +778,8 @@ function PreviewView({
   paraLabel: string | null;
   paraQuarter: QuarterNumber | null;
   notes: string;
-  mistakes: StudentMistakeDraft[];
-  onAddMistake: () => void;
-  onUpdateMistake: (id: string, patch: Partial<StudentMistakeDraft>) => void;
-  onRemoveMistake: (id: string) => void;
+  mistakeCount: number;
+  dateLabel: string;
   uploading: boolean;
   uploadProgress: number;
   uploadError: string | null;
@@ -708,8 +800,6 @@ function PreviewView({
     return () => URL.revokeObjectURL(url);
   }, [blob]);
 
-  const maxSec = Math.max(1, Math.round(durationMs / 1000));
-
   return (
     <div>
       <header className="mb-6">
@@ -721,9 +811,12 @@ function PreviewView({
         </h1>
       </header>
 
-      {/* Summary */}
       <div className="rounded-xl border border-neutral-200 bg-white p-4">
         <dl className="grid grid-cols-2 gap-y-3 text-sm">
+          <dt className="text-neutral-500">Date</dt>
+          <dd className="text-right font-medium text-neutral-900">
+            {dateLabel}
+          </dd>
           <dt className="text-neutral-500">Surah</dt>
           <dd className="text-right font-medium text-neutral-900">
             {surahNumber}
@@ -766,137 +859,27 @@ function PreviewView({
         )}
       </div>
 
-      {/* Playback */}
       {audioUrl && (
         <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
           <audio src={audioUrl} controls preload="metadata" className="w-full" />
         </div>
       )}
 
-      {/* Student-noticed mistakes */}
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900">
-              <AlertTriangle className="h-4 w-4" aria-hidden />
-              Mistakes you noticed (optional)
-            </h2>
-            <p className="mt-1 text-xs text-amber-800">
-              Anything you know you slipped on? Add it here so the qari can
-              confirm. This is optional.
-            </p>
-          </div>
-        </div>
-
-        {mistakes.length > 0 && (
-          <ul className="mt-3 space-y-3">
-            {mistakes.map((m) => (
-              <li
-                key={m.id}
-                className="rounded-lg border border-amber-200 bg-white p-3"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-neutral-600">
-                    Mistake #{mistakes.indexOf(m) + 1}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveMistake(m.id)}
-                    className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-red-700"
-                    aria-label="Remove mistake"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
-                  </button>
-                </div>
-
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
-                      At (sec)
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={maxSec}
-                      value={m.timestampSec}
-                      onChange={(e) =>
-                        onUpdateMistake(m.id, {
-                          timestampSec: Math.max(
-                            0,
-                            Math.min(maxSec, Number(e.target.value) || 0)
-                          ),
-                        })
-                      }
-                      className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1 text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
-                      Category
-                    </label>
-                    <select
-                      value={m.category}
-                      onChange={(e) =>
-                        onUpdateMistake(m.id, { category: e.target.value })
-                      }
-                      className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1 text-xs"
-                    >
-                      {CATEGORIES.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
-                      Severity
-                    </label>
-                    <select
-                      value={m.severity}
-                      onChange={(e) =>
-                        onUpdateMistake(m.id, { severity: e.target.value })
-                      }
-                      className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1 text-xs"
-                    >
-                      {SEVERITIES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <label className="mt-2 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
-                  What went wrong?
-                </label>
-                <textarea
-                  value={m.description}
-                  onChange={(e) =>
-                    onUpdateMistake(m.id, { description: e.target.value })
-                  }
-                  rows={2}
-                  maxLength={500}
-                  placeholder="e.g., madd not held long enough on ayah 22"
-                  className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1.5 text-xs"
-                />
-              </li>
-            ))}
-          </ul>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900">
+          <AlertTriangle className="h-4 w-4" aria-hidden />
+          Mistakes you noticed (optional)
+        </h2>
+        <p className="mt-1 text-xs text-amber-800">
+          Anything you know you slipped on? Add it here so the qari can confirm.
+        </p>
+        {mistakeCount > 0 && (
+          <p className="mt-2 text-xs font-medium text-amber-900">
+            {mistakeCount} mistake{mistakeCount === 1 ? "" : "s"} added.
+          </p>
         )}
-
-        <button
-          type="button"
-          onClick={onAddMistake}
-          className="mt-3 inline-flex items-center gap-1 rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden />
-          Add mistake
-        </button>
       </div>
 
-      {/* Errors + progress */}
       {uploadError && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {uploadError}
@@ -929,7 +912,6 @@ function PreviewView({
         </div>
       )}
 
-      {/* Actions */}
       <div className="mt-6 space-y-3">
         {!queued && (
           <button
@@ -939,9 +921,9 @@ function PreviewView({
           >
             {uploading
               ? "Uploading…"
-              : mistakes.length > 0
-              ? `Save recording with ${mistakes.length} mistake${
-                  mistakes.length === 1 ? "" : "s"
+              : mistakeCount > 0
+              ? `Save with ${mistakeCount} mistake${
+                  mistakeCount === 1 ? "" : "s"
                 }`
               : "Save recording"}
           </button>

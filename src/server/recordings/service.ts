@@ -29,6 +29,8 @@ export interface CreateRecordingOptions extends CreateRecordingInput {
   fileBuffer: Buffer;
   mimeType: string;
   studentMistakes?: StudentMistakeInput[];
+  /** If set, overrides the recordedAt timestamp (for backdating). */
+  recordedAtOverride?: Date;
 }
 
 export interface CreatedRecording {
@@ -99,6 +101,7 @@ export async function createRecording(
   if (opts.ayahTo > surah.ayahCount) throw new Error("INVALID_AYAH_RANGE");
 
   const now = new Date();
+  const recordedAt = opts.recordedAtOverride ?? now;
 
   const checksum = crypto
     .createHash("sha256")
@@ -135,13 +138,12 @@ export async function createRecording(
         checksum,
         uploadStatus: "UPLOADED",
         reviewStatus: "UNREVIEWED",
-        recordedAt: now,
+        recordedAt,
         uploadedAt: now,
         timezone: opts.timezone || "UTC",
       },
     });
 
-    // Insert student-suggested mistakes (if any).
     let studentMistakeCount = 0;
     if (opts.studentMistakes && opts.studentMistakes.length > 0) {
       for (const m of opts.studentMistakes) {
@@ -161,7 +163,6 @@ export async function createRecording(
         });
         studentMistakeCount += 1;
       }
-      // If any student mistakes were recorded, put the recording into IN_REVIEW.
       if (studentMistakeCount > 0) {
         await db.recording.update({
           where: { id: created.id },
