@@ -6,6 +6,13 @@ const DB_NAME = "qrs-offline";
 const DB_VERSION = 1;
 const STORE = "pending";
 
+export interface StudentMistakeDraft {
+  timestampMs: number;
+  category: string;
+  severity: string;
+  description: string;
+}
+
 export interface PendingUpload {
   id: string;
   blob: Blob;
@@ -14,8 +21,16 @@ export interface PendingUpload {
   surahNumber: number;
   ayahFrom: number;
   ayahTo: number;
+  paraNumber: number | null;
+  paraFrom: number | null;
+  paraTo: number | null;
+  paraQuarter: number | null;
+  qariId: string | null;
   notes: string;
   timezone: string;
+  studentMistakes: StudentMistakeDraft[];
+  /** YYYY-MM-DD if backdated, else null. */
+  recordedAt: string | null;
   createdAt: number;
   attempts: number;
   lastError: string | null;

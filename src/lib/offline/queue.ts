@@ -7,7 +7,9 @@ import {
   updatePending,
   newId,
   PendingUpload,
+  StudentMistakeDraft,
 } from "./db";
+import { uploadToCloudinary } from "@/lib/cloudinary/direct-upload";
 
 export interface EnqueueInput {
   blob: Blob;
@@ -16,8 +18,16 @@ export interface EnqueueInput {
   surahNumber: number;
   ayahFrom: number;
   ayahTo: number;
+  paraNumber: number | null;
+  paraFrom: number | null;
+  paraTo: number | null;
+  paraQuarter: number | null;
+  qariId: string | null;
   notes: string;
   timezone: string;
+  studentMistakes: StudentMistakeDraft[];
+  /** YYYY-MM-DD if backdated, else null. */
+  recordedAt: string | null;
 }
 
 export async function enqueue(input: EnqueueInput): Promise<PendingUpload> {
@@ -29,8 +39,15 @@ export async function enqueue(input: EnqueueInput): Promise<PendingUpload> {
     surahNumber: input.surahNumber,
     ayahFrom: input.ayahFrom,
     ayahTo: input.ayahTo,
+    paraNumber: input.paraNumber,
+    paraFrom: input.paraFrom,
+    paraTo: input.paraTo,
+    paraQuarter: input.paraQuarter,
+    qariId: input.qariId,
     notes: input.notes,
     timezone: input.timezone,
+    studentMistakes: input.studentMistakes,
+    recordedAt: input.recordedAt,
     createdAt: Date.now(),
     attempts: 0,
     lastError: null,
@@ -41,23 +58,39 @@ export async function enqueue(input: EnqueueInput): Promise<PendingUpload> {
 
 export type UploadOutcome = "uploaded" | "offline" | "failed";
 
+/**
+ * Retries one queued upload:
+ *   1. Upload blob to Cloudinary (direct — no size limit)
+ *   2. POST metadata to /api/recordings
+ *   3. Delete from queue on success
+ */
 export async function tryUploadItem(
   item: PendingUpload
 ): Promise<UploadOutcome> {
-  const form = new FormData();
-  const ext = extensionFromMime(item.mimeType);
-  form.append("audio", item.blob, `recording.${ext}`);
-  form.append("surahNumber", String(item.surahNumber));
-  form.append("ayahFrom", String(item.ayahFrom));
-  form.append("ayahTo", String(item.ayahTo));
-  form.append("durationMs", String(item.durationMs));
-  form.append("notes", item.notes);
-  form.append("timezone", item.timezone);
-
   try {
+    // Step 1: Cloudinary direct upload
+    const cloudResult = await uploadToCloudinary(item.blob);
+
+    // Step 2: send metadata to our API
     const res = await fetch("/api/recordings", {
       method: "POST",
-      body: form,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        surahNumber: item.surahNumber,
+        ayahFrom: item.ayahFrom,
+        ayahTo: item.ayahTo,
+        paraQuarter: item.paraQuarter,
+        qariId: item.qariId,
+        durationMs: item.durationMs,
+        notes: item.notes,
+        timezone: item.timezone,
+        studentMistakes: item.studentMistakes,
+        recordedAt: item.recordedAt,
+        cloudinaryUrl: cloudResult.secure_url,
+        cloudinaryPublicId: cloudResult.public_id,
+        cloudinaryBytes: cloudResult.bytes,
+        mimeType: item.mimeType,
+      }),
     });
 
     if (res.ok) {
@@ -70,8 +103,7 @@ export async function tryUploadItem(
       | null;
     const errMsg = data?.error ?? `HTTP ${res.status}`;
 
-    // 4xx errors are permanent failures (bad data, unauthorized).
-    // 5xx errors are transient (server issue) — keep in queue.
+    // 4xx = permanent failure. 5xx = transient, keep trying.
     if (res.status >= 400 && res.status < 500) {
       await updatePending(item.id, {
         attempts: item.attempts + 1,
@@ -85,24 +117,15 @@ export async function tryUploadItem(
       lastError: `Server error: ${errMsg}`,
     });
     return "offline";
-  } catch {
-    // Network error — definitely offline-ish. Keep in queue.
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Upload failed.";
     await updatePending(item.id, {
       attempts: item.attempts + 1,
-      lastError: "No connection",
+      lastError: msg,
     });
+    // Network error → treat as offline, keep in queue.
     return "offline";
   }
-}
-
-function extensionFromMime(mime: string): string {
-  const m = mime.toLowerCase();
-  if (m.includes("webm")) return "webm";
-  if (m.includes("ogg")) return "ogg";
-  if (m.includes("mp4") || m.includes("m4a")) return "m4a";
-  if (m.includes("mpeg") || m.includes("mp3")) return "mp3";
-  if (m.includes("wav")) return "wav";
-  return "bin";
 }
 
 export async function flushQueue(): Promise<{
@@ -119,7 +142,7 @@ export async function flushQueue(): Promise<{
     const result = await tryUploadItem(item);
     if (result === "uploaded") uploaded += 1;
     else if (result === "failed") failed += 1;
-    else break; // offline → stop trying the rest
+    else break;
   }
 
   const remaining = (await listPending()).length;
