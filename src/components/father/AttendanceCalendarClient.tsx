@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { X, Mic, Award, Clock } from "lucide-react";
+import { X, Clock, User, Award, BookOpen, AlertTriangle } from "lucide-react";
 import Calendar, { CalendarDay } from "@/components/calendar/Calendar";
 import { formatMs } from "@/lib/format";
+import { isWeeklyOff } from "@/lib/attendance/off-days";
 
 interface StudentOption {
   id: string;
@@ -13,9 +14,7 @@ interface StudentOption {
 
 interface Props {
   students: StudentOption[];
-  /** Where the "open recording" links should point, e.g. "/father/recordings" */
   recordingBasePath: string;
-  /** Where the "open recording" links should point for the qari, e.g. "/qari/recordings" */
   startStudentId?: string;
 }
 
@@ -110,9 +109,7 @@ export default function AttendanceCalendarClient({
     setDayData(null);
     setDayLoading(true);
     try {
-      const res = await fetch(
-        `/api/day?date=${iso}&studentId=${studentId}`
-      );
+      const res = await fetch(`/api/day?date=${iso}&studentId=${studentId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed");
       setDayData({ attendance: data.attendance, recordings: data.recordings });
@@ -130,6 +127,11 @@ export default function AttendanceCalendarClient({
 
   const studentName =
     students.find((s) => s.id === studentId)?.name ?? "Student";
+
+  const selectedDateObj = selectedDate
+    ? new Date(selectedDate + "T12:00:00")
+    : null;
+  const selectedIsOff = selectedDateObj ? isWeeklyOff(selectedDateObj) : false;
 
   return (
     <div className="space-y-4">
@@ -183,6 +185,11 @@ export default function AttendanceCalendarClient({
                     }
                   )}
                 </h3>
+                {selectedIsOff && (
+                  <p className="mt-1 inline-block rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-sky-900">
+                    Weekly off
+                  </p>
+                )}
               </div>
               <button
                 onClick={closeDay}
@@ -199,7 +206,6 @@ export default function AttendanceCalendarClient({
               </p>
             ) : (
               <>
-                {/* Attendance status */}
                 <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
                   <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
                     Attendance
@@ -220,6 +226,15 @@ export default function AttendanceCalendarClient({
                         </p>
                       )}
                     </>
+                  ) : selectedIsOff ? (
+                    <>
+                      <p className="mt-1 text-sm font-semibold text-sky-900">
+                        WEEKLY OFF
+                      </p>
+                      <p className="mt-0.5 text-xs text-sky-800">
+                        Sunday is a scheduled off day. No session expected.
+                      </p>
+                    </>
                   ) : (
                     <p className="mt-1 text-sm text-neutral-500">
                       No attendance marked.
@@ -227,7 +242,6 @@ export default function AttendanceCalendarClient({
                   )}
                 </div>
 
-                {/* Recordings */}
                 <div className="mt-4">
                   <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
                     Sessions ({dayData?.recordings.length ?? 0})
@@ -246,10 +260,12 @@ export default function AttendanceCalendarClient({
                               ? `Para ${r.paraFrom}`
                               : `Paras ${r.paraFrom}–${r.paraTo}`
                             : null;
-                        const time = new Date(r.recordedAt).toLocaleTimeString(
-                          undefined,
-                          { hour: "2-digit", minute: "2-digit" }
-                        );
+                        const time = new Date(
+                          r.recordedAt
+                        ).toLocaleTimeString(undefined, {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
                         return (
                           <li key={r.id}>
                             <Link
@@ -265,17 +281,24 @@ export default function AttendanceCalendarClient({
                                     </span>
                                   </p>
                                   {paraLabel && (
-                                    <p className="mt-0.5 text-xs text-neutral-600">
+                                    <p className="mt-0.5 flex items-center gap-1 text-xs text-neutral-600">
+                                      <BookOpen
+                                        className="h-3 w-3"
+                                        aria-hidden
+                                      />
                                       {paraLabel}
                                     </p>
                                   )}
-                                  <p className="mt-1 flex items-center gap-2 text-[11px] text-neutral-500">
+                                  <p className="mt-1 flex items-center gap-1 text-[11px] text-neutral-500">
                                     <Clock className="h-3 w-3" aria-hidden />
                                     {time} · {formatMs(r.durationMs)}
                                   </p>
                                   {r.qari && (
                                     <p className="mt-0.5 flex items-center gap-1 text-[11px] text-neutral-500">
-                                      <Award className="h-3 w-3" aria-hidden />
+                                      <Award
+                                        className="h-3 w-3"
+                                        aria-hidden
+                                      />
                                       {r.qari.name}
                                     </p>
                                   )}
@@ -293,9 +316,12 @@ export default function AttendanceCalendarClient({
                                     {r.reviewStatus.replace("_", " ")}
                                   </span>
                                   {r.mistakes > 0 && (
-                                    <span className="text-[10px] font-medium text-amber-700">
-                                      {r.mistakes} mistake
-                                      {r.mistakes === 1 ? "" : "s"}
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700">
+                                      <AlertTriangle
+                                        className="h-3 w-3"
+                                        aria-hidden
+                                      />
+                                      {r.mistakes}
                                     </span>
                                   )}
                                 </div>

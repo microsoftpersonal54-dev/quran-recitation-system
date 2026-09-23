@@ -2,23 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { isWeeklyOff } from "@/lib/attendance/off-days";
 
 export type DayStatus = "PRESENT" | "LEAVE" | "ABSENT" | null;
 
 export interface CalendarDay {
-  /** ISO date string YYYY-MM-DD */
   date: string;
   status: DayStatus;
-  /** Optional context shown on hover/tap, e.g. reason text */
   label?: string;
 }
 
 interface Props {
-  /** Map of ISO date → status for the current month */
   days: Record<string, CalendarDay>;
-  /** Called when a day is tapped */
   onSelectDate: (isoDate: string) => void;
-  /** Optional initial month (defaults to today's month) */
   initialMonth?: Date;
 }
 
@@ -133,6 +129,8 @@ export default function Calendar({ days, onSelectDate, initialMonth }: Props) {
           const dayNum = cell.date.getDate();
           const entry = days[iso];
           const isToday = iso === todayIso;
+          const off = isWeeklyOff(cell.date) && !entry?.status;
+          const offWithActivity = isWeeklyOff(cell.date) && entry?.status;
 
           return (
             <button
@@ -141,12 +139,21 @@ export default function Calendar({ days, onSelectDate, initialMonth }: Props) {
               className={`relative flex aspect-square items-center justify-center rounded-md text-xs ${
                 isToday
                   ? "border border-neutral-900 font-semibold text-neutral-900"
+                  : off
+                  ? "bg-sky-50 text-sky-900"
                   : "text-neutral-700 hover:bg-neutral-100"
               }`}
               aria-label={`${dayNum}${
-                entry?.status ? ` — ${entry.status}` : ""
+                entry?.status
+                  ? ` — ${entry.status}`
+                  : off
+                  ? " — weekly off"
+                  : ""
               }`}
-              title={entry?.label ?? undefined}
+              title={
+                entry?.label ??
+                (off ? "Weekly off (Sunday)" : undefined)
+              }
             >
               <span>{dayNum}</span>
               {entry?.status && (
@@ -155,6 +162,12 @@ export default function Calendar({ days, onSelectDate, initialMonth }: Props) {
                     entry.status
                   )}`}
                 />
+              )}
+              {offWithActivity && (
+                <span className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-sky-400" />
+              )}
+              {off && !entry?.status && (
+                <span className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-sky-400" />
               )}
             </button>
           );
@@ -170,6 +183,9 @@ export default function Calendar({ days, onSelectDate, initialMonth }: Props) {
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-red-500" /> Absent
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-sky-400" /> Weekly off
         </span>
       </div>
     </div>
