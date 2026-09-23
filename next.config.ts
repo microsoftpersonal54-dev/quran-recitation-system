@@ -2,14 +2,22 @@ import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === "production";
 
+// Content Security Policy: strict enough to be meaningful, permissive enough
+// for Next.js dev + Tailwind + Cloudinary uploads + audio playback.
 const csp = [
   "default-src 'self'",
+  // Next.js injects inline scripts for hydration; 'unsafe-inline' is required.
   `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data:",
+  // Audio playback comes from res.cloudinary.com (delivered files)
   "media-src 'self' blob: https://res.cloudinary.com",
-  "connect-src 'self' https://openrouter.ai https://res.cloudinary.com",
+  // Network connections:
+  //   - openrouter.ai        : AI assistant
+  //   - api.cloudinary.com   : DIRECT UPLOADS (this was missing before!)
+  //   - res.cloudinary.com   : playback / metadata
+  "connect-src 'self' https://openrouter.ai https://api.cloudinary.com https://res.cloudinary.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -34,6 +42,12 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+        ],
       },
     ];
   },

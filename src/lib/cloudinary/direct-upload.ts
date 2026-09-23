@@ -2,6 +2,9 @@
 
 // Direct browser → Cloudinary upload using an unsigned upload preset.
 // This bypasses Vercel's serverless 4.5 MB body limit entirely.
+//
+// Cloudinary allows up to 100 MB per file on the free plan.
+// For long recordings on slow networks, we set a generous timeout.
 
 export interface DirectUploadResult {
   secure_url: string;
@@ -29,13 +32,6 @@ function cloudinaryConfig() {
   return { cloud, preset };
 }
 
-/**
- * Uploads a Blob directly to Cloudinary.
- * Returns the Cloudinary metadata. The caller then sends this metadata to
- * our own API (tiny JSON payload) to create the recording row.
- *
- * Supports progress via XHR.
- */
 export function uploadToCloudinary(
   blob: Blob,
   onProgress?: (p: DirectUploadProgress) => void
@@ -47,6 +43,9 @@ export function uploadToCloudinary(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url);
+
+    // 30-minute timeout — large files on slow networks need it.
+    xhr.timeout = 30 * 60 * 1000;
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && onProgress) {
@@ -72,7 +71,6 @@ export function uploadToCloudinary(
           reject(new Error("Cloudinary returned malformed JSON."));
         }
       } else {
-        // Try to surface a useful error.
         let detail = "";
         try {
           const body = JSON.parse(xhr.responseText);
@@ -82,7 +80,7 @@ export function uploadToCloudinary(
         }
         reject(
           new Error(
-            `Cloudinary upload failed (${xhr.status})${
+            `Cloudinary rejected the file (${xhr.status})${
               detail ? `: ${detail}` : ""
             }`
           )
@@ -91,8 +89,18 @@ export function uploadToCloudinary(
     };
 
     xhr.onerror = () =>
-      reject(new Error("Network error during Cloudinary upload."));
-    xhr.ontimeout = () => reject(new Error("Cloudinary upload timed out."));
+      reject(
+        new Error(
+          "Network error during Cloudinary upload. Check your internet connection."
+        )
+      );
+    xhr.ontimeout = () =>
+      reject(
+        new Error(
+          "Upload timed out. Try again on a stronger Wi-Fi connection."
+        )
+      );
+    xhr.onabort = () => reject(new Error("Upload was cancelled."));
 
     const form = new FormData();
     form.append("file", blob);
