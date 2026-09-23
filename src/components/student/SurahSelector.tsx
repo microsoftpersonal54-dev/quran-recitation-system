@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SURAHS, getSurah } from "@/lib/quran/surahs";
 
 interface Props {
@@ -24,31 +25,60 @@ export default function SurahSelector({
   const surah = getSurah(surahNumber);
   const maxAyah = surah?.ayahCount ?? 1;
 
-  function setSurah(n: number) {
-    const s = getSurah(n);
-    const max = s?.ayahCount ?? 1;
-    onChange({
-      surahNumber: n,
-      ayahFrom: Math.min(ayahFrom, max),
-      ayahTo: Math.min(ayahTo, max),
-    });
-  }
+  // Local text state so the user can type freely ("6", "18", etc.)
+  // without React clamping mid-keystroke.
+  const [fromText, setFromText] = useState<string>(String(ayahFrom));
+  const [toText, setToText] = useState<string>(String(ayahTo));
 
-  function setFrom(n: number) {
-    const v = Math.min(Math.max(1, n), maxAyah);
+  // Sync when parent value changes (e.g. surah switch).
+  useEffect(() => {
+    setFromText(String(ayahFrom));
+  }, [ayahFrom]);
+
+  useEffect(() => {
+    setToText(String(ayahTo));
+  }, [ayahTo]);
+
+  function commitFrom() {
+    const n = Number(fromText);
+    if (!Number.isFinite(n) || n < 1) {
+      setFromText(String(ayahFrom));
+      return;
+    }
+    const v = Math.min(Math.max(1, Math.floor(n)), maxAyah);
     onChange({
       surahNumber,
       ayahFrom: v,
       ayahTo: Math.max(v, ayahTo),
     });
+    setFromText(String(v));
   }
 
-  function setTo(n: number) {
-    const v = Math.min(Math.max(1, n), maxAyah);
+  function commitTo() {
+    const n = Number(toText);
+    if (!Number.isFinite(n) || n < 1) {
+      setToText(String(ayahTo));
+      return;
+    }
+    const v = Math.min(Math.max(1, Math.floor(n)), maxAyah);
     onChange({
       surahNumber,
       ayahFrom: Math.min(ayahFrom, v),
       ayahTo: v,
+    });
+    setToText(String(v));
+  }
+
+  function changeSurah(n: number) {
+    const s = getSurah(n);
+    const max = s?.ayahCount ?? 1;
+    // Keep the current ayah range, but clamp within new surah bounds.
+    const clampedFrom = Math.min(Math.max(1, ayahFrom), max);
+    const clampedTo = Math.min(Math.max(clampedFrom, ayahTo), max);
+    onChange({
+      surahNumber: n,
+      ayahFrom: clampedFrom,
+      ayahTo: clampedTo,
     });
   }
 
@@ -65,7 +95,7 @@ export default function SurahSelector({
           id="surah"
           value={surahNumber}
           disabled={disabled}
-          onChange={(e) => setSurah(Number(e.target.value))}
+          onChange={(e) => changeSurah(Number(e.target.value))}
           className="mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-3 text-base text-neutral-900 focus:border-neutral-900 focus:outline-none disabled:bg-neutral-100"
         >
           {SURAHS.map((s) => (
@@ -90,9 +120,16 @@ export default function SurahSelector({
             inputMode="numeric"
             min={1}
             max={maxAyah}
-            value={ayahFrom}
+            value={fromText}
             disabled={disabled}
-            onChange={(e) => setFrom(Number(e.target.value))}
+            onChange={(e) => setFromText(e.target.value)}
+            onBlur={commitFrom}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            placeholder="1"
             className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-3 text-base text-neutral-900 focus:border-neutral-900 focus:outline-none disabled:bg-neutral-100"
           />
         </div>
@@ -109,9 +146,16 @@ export default function SurahSelector({
             inputMode="numeric"
             min={1}
             max={maxAyah}
-            value={ayahTo}
+            value={toText}
             disabled={disabled}
-            onChange={(e) => setTo(Number(e.target.value))}
+            onChange={(e) => setToText(e.target.value)}
+            onBlur={commitTo}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            placeholder={String(maxAyah)}
             className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-3 text-base text-neutral-900 focus:border-neutral-900 focus:outline-none disabled:bg-neutral-100"
           />
         </div>
@@ -119,7 +163,7 @@ export default function SurahSelector({
 
       {surah && (
         <p className="text-xs text-neutral-500">
-          This surah has {surah.ayahCount} ayahs. Choose a range between 1 and{" "}
+          This surah has {surah.ayahCount} ayahs. Range must be between 1 and{" "}
           {surah.ayahCount}.
         </p>
       )}
