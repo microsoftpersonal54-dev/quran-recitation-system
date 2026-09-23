@@ -17,6 +17,67 @@ export const dynamic = "force-dynamic";
 
 const MAX_UPLOAD_FIELD_BYTES = 51 * 1024 * 1024;
 
+/**
+ * Returns midnight UTC of the client's local calendar day.
+ * Uses the client's timezone string (e.g. "Asia/Karachi") so a recording
+ * made at 1 AM local time still lands on the correct calendar day.
+ */
+function localDayInZone(timezone: string): Date {
+  const now = new Date();
+  try {
+    const fmt = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const parts = fmt.formatToParts(now);
+    const y = Number(parts.find((p) => p.type === "year")?.value);
+    const m = Number(parts.find((p) => p.type === "month")?.value);
+    const d = Number(parts.find((p) => p.type === "day")?.value);
+    if (!y || !m || !d) throw new Error("bad parts");
+    return new Date(Date.UTC(y, m - 1, d));
+  } catch {
+    // Fallback: UTC day.
+    return new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    );
+  }
+}
+
+/**
+ * Auto-marks the student PRESENT for today's local date — but only if
+ * there is no existing attendance row for that day. If the student has
+ * already marked LEAVE, we respect that and do nothing.
+ */
+async function markPresentIfAbsent(
+  studentId: string,
+  timezone: string
+): Promise<void> {
+  try {
+    const dayDate = localDayInZone(timezone);
+    const existing = await db.attendance.findUnique({
+      where: { studentId_date: { studentId, date: dayDate } },
+      select: { id: true },
+    });
+    if (existing) return;
+
+    await db.attendance.create({
+      data: {
+        studentId,
+        date: dayDate,
+        status: "PRESENT",
+        reason: null,
+        notes: null,
+        markedById: null,
+      },
+    });
+  } catch (err) {
+    // Never fail the upload because of attendance marking.
+    console.warn("[recordings] auto-attendance failed", err);
+  }
+}
+
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) {
@@ -133,7 +194,6 @@ export async function POST(req: NextRequest) {
       ? qariIdRaw.trim()
       : null;
 
-  // Parse student mistakes.
   const mistakesRaw = form.get("studentMistakes");
   let studentMistakes: StudentMistakeInput[] = [];
   if (typeof mistakesRaw === "string" && mistakesRaw.trim().length > 0) {
@@ -155,6 +215,8 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  const timezone = String(form.get("timezone") ?? "UTC");
+
   const meta = {
     surahNumber,
     ayahFrom,
@@ -166,7 +228,7 @@ export async function POST(req: NextRequest) {
     qariId,
     durationMs: Number(form.get("durationMs")),
     notes: String(form.get("notes") ?? ""),
-    timezone: String(form.get("timezone") ?? "UTC"),
+    timezone,
   };
 
   const parsed = createRecordingSchema.safeParse(meta);
@@ -188,6 +250,9 @@ export async function POST(req: NextRequest) {
       studentMistakes,
       ...parsed.data,
     });
+
+    // --- Auto-mark PRESENT for the student's local day ---
+    await markPresentIfAbsent(user.id, timezone);
 
     const recipients = await db.user.findMany({
       where: { active: true, role: { in: ["FATHER", "QARI"] } },
