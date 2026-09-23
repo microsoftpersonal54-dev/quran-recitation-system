@@ -71,7 +71,6 @@ export default function Recorder({ studentName }: Props) {
   const [notes, setNotes] = useState("");
   const [qariId, setQariId] = useState<string | null>(null);
 
-  // Backdating support
   const [dateMode, setDateMode] = useState<"today" | "custom">("today");
   const [customDate, setCustomDate] = useState<string>(todayIso());
 
@@ -307,9 +306,10 @@ export default function Recorder({ studentName }: Props) {
         paraLabel={paraLabel}
         paraQuarter={paraQuarter}
         notes={notes}
-        mistakeCount={studentMistakes.filter(
-          (m) => m.description.trim().length > 0
-        ).length}
+        mistakes={studentMistakes}
+        onAddMistake={addStudentMistake}
+        onUpdateMistake={updateStudentMistake}
+        onRemoveMistake={removeStudentMistake}
         dateLabel={
           dateMode === "custom"
             ? new Date(customDate + "T12:00:00").toLocaleDateString(undefined, {
@@ -449,7 +449,6 @@ function SetupView({
   onStart: () => void;
 }) {
   const today = todayIso();
-  const maxDate = today; // can't pick a future date
 
   return (
     <div>
@@ -508,7 +507,7 @@ function SetupView({
                 id="customDate"
                 type="date"
                 value={customDate}
-                max={maxDate}
+                max={today}
                 onChange={(e) => onCustomDateChange(e.target.value)}
                 className="mt-1 w-full rounded-md border border-neutral-300 bg-white px-3 py-3 text-base text-neutral-900 focus:border-neutral-900 focus:outline-none"
               />
@@ -745,7 +744,7 @@ function Waveform({ active, level }: { active: boolean; level: number }) {
   );
 }
 
-// ==================== PREVIEW ====================
+// ==================== PREVIEW + MISTAKES EDITOR ====================
 
 function PreviewView({
   studentName,
@@ -758,7 +757,10 @@ function PreviewView({
   paraLabel,
   paraQuarter,
   notes,
-  mistakeCount,
+  mistakes,
+  onAddMistake,
+  onUpdateMistake,
+  onRemoveMistake,
   dateLabel,
   uploading,
   uploadProgress,
@@ -778,7 +780,10 @@ function PreviewView({
   paraLabel: string | null;
   paraQuarter: QuarterNumber | null;
   notes: string;
-  mistakeCount: number;
+  mistakes: StudentMistakeDraft[];
+  onAddMistake: () => void;
+  onUpdateMistake: (id: string, patch: Partial<StudentMistakeDraft>) => void;
+  onRemoveMistake: (id: string) => void;
   dateLabel: string;
   uploading: boolean;
   uploadProgress: number;
@@ -800,6 +805,11 @@ function PreviewView({
     return () => URL.revokeObjectURL(url);
   }, [blob]);
 
+  const maxSec = Math.max(1, Math.round(durationMs / 1000));
+  const filledMistakes = mistakes.filter(
+    (m) => m.description.trim().length > 0
+  );
+
   return (
     <div>
       <header className="mb-6">
@@ -811,6 +821,7 @@ function PreviewView({
         </h1>
       </header>
 
+      {/* Summary */}
       <div className="rounded-xl border border-neutral-200 bg-white p-4">
         <dl className="grid grid-cols-2 gap-y-3 text-sm">
           <dt className="text-neutral-500">Date</dt>
@@ -859,12 +870,14 @@ function PreviewView({
         )}
       </div>
 
+      {/* Playback */}
       {audioUrl && (
         <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
           <audio src={audioUrl} controls preload="metadata" className="w-full" />
         </div>
       )}
 
+      {/* STUDENT MISTAKES EDITOR */}
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-amber-900">
           <AlertTriangle className="h-4 w-4" aria-hidden />
@@ -873,13 +886,116 @@ function PreviewView({
         <p className="mt-1 text-xs text-amber-800">
           Anything you know you slipped on? Add it here so the qari can confirm.
         </p>
-        {mistakeCount > 0 && (
-          <p className="mt-2 text-xs font-medium text-amber-900">
-            {mistakeCount} mistake{mistakeCount === 1 ? "" : "s"} added.
-          </p>
+
+        {mistakes.length > 0 && (
+          <ul className="mt-3 space-y-3">
+            {mistakes.map((m, idx) => (
+              <li
+                key={m.id}
+                className="rounded-lg border border-amber-200 bg-white p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-neutral-600">
+                    Mistake #{idx + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemoveMistake(m.id)}
+                    className="rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-red-700"
+                    aria-label="Remove mistake"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
+
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                      At (sec)
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={maxSec}
+                      value={m.timestampSec}
+                      onChange={(e) =>
+                        onUpdateMistake(m.id, {
+                          timestampSec: Math.max(
+                            0,
+                            Math.min(maxSec, Number(e.target.value) || 0)
+                          ),
+                        })
+                      }
+                      className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                      Category
+                    </label>
+                    <select
+                      value={m.category}
+                      onChange={(e) =>
+                        onUpdateMistake(m.id, { category: e.target.value })
+                      }
+                      className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1 text-xs"
+                    >
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                      Severity
+                    </label>
+                    <select
+                      value={m.severity}
+                      onChange={(e) =>
+                        onUpdateMistake(m.id, { severity: e.target.value })
+                      }
+                      className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1 text-xs"
+                    >
+                      {SEVERITIES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <label className="mt-2 block text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+                  What went wrong?
+                </label>
+                <textarea
+                  value={m.description}
+                  onChange={(e) =>
+                    onUpdateMistake(m.id, { description: e.target.value })
+                  }
+                  rows={2}
+                  maxLength={500}
+                  placeholder="e.g., madd not held long enough on ayah 22"
+                  className="mt-0.5 w-full rounded border border-neutral-300 px-2 py-1.5 text-xs"
+                />
+              </li>
+            ))}
+          </ul>
         )}
+
+        <button
+          type="button"
+          onClick={onAddMistake}
+          className="mt-3 inline-flex items-center gap-1 rounded-md border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden />
+          Add mistake
+        </button>
       </div>
 
+      {/* Errors + progress */}
       {uploadError && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
           {uploadError}
@@ -912,6 +1028,7 @@ function PreviewView({
         </div>
       )}
 
+      {/* Actions */}
       <div className="mt-6 space-y-3">
         {!queued && (
           <button
@@ -921,9 +1038,9 @@ function PreviewView({
           >
             {uploading
               ? "Uploading…"
-              : mistakeCount > 0
-              ? `Save with ${mistakeCount} mistake${
-                  mistakeCount === 1 ? "" : "s"
+              : filledMistakes.length > 0
+              ? `Save with ${filledMistakes.length} mistake${
+                  filledMistakes.length === 1 ? "" : "s"
                 }`
               : "Save recording"}
           </button>
